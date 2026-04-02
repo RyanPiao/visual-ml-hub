@@ -165,6 +165,25 @@ layout = make_3d_layout(
     height=720,
 )
 layout.update(
+    title=dict(text=(
+        "<b>Heterogeneous Treatment Effects: Who Benefits Most?</b><br>"
+        "<span style='font-size:13px; color:#6b7280'>Who benefits most from treatment?</span>"
+    ), font=dict(size=16), x=0.5, xanchor="center"),
+    margin=dict(l=20, r=20, t=60, b=110),
+    annotations=[
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text=(
+                 "<span style='color:#eab308'><b>Gold</b></span> = true CATE | "
+                 "<span style='color:#1357c9'><b>Blue</b></span> = estimated CATE | "
+                 "Black dots = CATE=0 boundary"
+             ), showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text=(
+                 "Peaks = treatment most effective (high-income, young). "
+                 "Valleys = least effective. The CATE=0 boundary shows where treatment effect switches sign."
+             ),
+             showarrow=False, font=dict(size=11, color="#6b7280")),
+    ],
     scene=dict(camera=dict(eye=dict(x=1.6, y=-1.5, z=1.0))),
     legend=dict(orientation="v", x=1.08, y=0.95),
 )

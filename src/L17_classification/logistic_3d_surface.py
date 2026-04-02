@@ -122,17 +122,20 @@ layout = make_3d_layout(
     width=900, height=700,
 )
 layout.update(
+    title=dict(text=(
+        "<b>Logistic Regression: 3D Decision Surface</b><br>"
+        "<span style='font-size:13px; color:#6b7280'>Adjust C slider — steep surface = confident, flat = uncertain</span>"
+    ), font=dict(size=16), x=0.5, xanchor="center"),
+    margin=dict(l=20, r=20, t=60, b=110),
     sliders=sliders,
     annotations=[
-        dict(
-            text="<b>Steep surface</b> = confident predictions &nbsp;|&nbsp; "
-                 "<b>Flat surface</b> = uncertain predictions",
-            xref="paper", yref="paper",
-            x=0.5, y=-0.02,
-            showarrow=False,
-            font=dict(size=12, color=COLORS["gray"]),
-            xanchor="center",
-        ),
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text="<span style='color:#10b981'><b>Green</b></span> = no default | "
+                  "<span style='color:#ef4444'><b>Red</b></span> = default | Surface = P(default)",
+             showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text="Rotate to see the S-shaped sigmoid surface. Higher C = less regularization = steeper, more complex boundary.",
+             showarrow=False, font=dict(size=11, color="#6b7280")),
     ],
 )
 layout.scene.zaxis.update(range=[0, 1])

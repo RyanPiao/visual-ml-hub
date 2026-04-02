@@ -160,6 +160,23 @@ layout = make_3d_layout(
     height=720,
 )
 layout.update(
+    title=dict(text=(
+        "<b>Clustering Economies: PCA Projection with K-Means</b><br>"
+        "<span style='font-size:13px; color:#6b7280'>"
+        f"3 principal components explain {sum(var_explained):.0f}% of total variance</span>"
+    ), font=dict(size=16), x=0.5, xanchor="center"),
+    margin=dict(l=20, r=20, t=60, b=110),
+    annotations=[
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text="Colors = K-Means cluster assignment | <b>X</b> marker = true group differs from cluster",
+             showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text=(
+                 "Drag K slider: more clusters capture finer groups but risk splitting natural categories. "
+                 "Rotate to see separation in 3D."
+             ),
+             showarrow=False, font=dict(size=11, color="#6b7280")),
+    ],
     sliders=[dict(
         active=0,
         currentvalue=dict(prefix="K = "),

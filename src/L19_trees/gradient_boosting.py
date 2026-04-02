@@ -98,6 +98,9 @@ fig.add_trace(go.Scatter(
 # We'll rebuild traces for the active learning rate via dropdown + slider
 # Strategy: use slider for stage, dropdown rebuilds all slider steps
 
+gb_subtitle = ("<span style='font-size:13px; color:#6b7280'>"
+               "Each stage fits residuals from the previous</span>")
+
 steps = []
 for s in range(n_stages):
     d = all_results[default_lr][s]
@@ -107,8 +110,12 @@ for s in range(n_stages):
             {
                 "y": [y, y_truth, d["preds_plot"], d["residuals"], [0, 0]],
             },
-            {"title": f"Gradient Boosting — Stage {s+1}/{n_stages}, "
-                      f"LR={default_lr}, MSE={d['mse']:.4f}"}
+            {"title": dict(
+                text=(f"<b>Gradient Boosting — Stage {s+1}/{n_stages}, "
+                      f"LR={default_lr}, MSE={d['mse']:.4f}</b><br>"
+                      + gb_subtitle),
+                font=dict(size=16), x=0.5, xanchor="center",
+            )}
         ],
         label=str(s + 1),
     ))
@@ -123,8 +130,12 @@ for lr in learning_rates:
         method="update",
         args=[
             {"y": [y, y_truth, d["preds_plot"], d["residuals"], [0, 0]]},
-            {"title": f"Gradient Boosting — Stage 1/{n_stages}, "
-                      f"LR={lr}, MSE={d['mse']:.4f}",
+            {"title": dict(
+                 text=(f"<b>Gradient Boosting — Stage 1/{n_stages}, "
+                       f"LR={lr}, MSE={d['mse']:.4f}</b><br>"
+                       + gb_subtitle),
+                 font=dict(size=16), x=0.5, xanchor="center",
+             ),
              "sliders": [dict(
                  active=0,
                  currentvalue=dict(prefix="Stage: "),
@@ -137,8 +148,12 @@ for lr in learning_rates:
                                     all_results[lr][ss]["preds_plot"],
                                     all_results[lr][ss]["residuals"],
                                     [0, 0]]},
-                             {"title": f"Gradient Boosting — Stage {ss+1}/{n_stages}, "
-                                       f"LR={lr}, MSE={all_results[lr][ss]['mse']:.4f}"}
+                             {"title": dict(
+                                 text=(f"<b>Gradient Boosting — Stage {ss+1}/{n_stages}, "
+                                       f"LR={lr}, MSE={all_results[lr][ss]['mse']:.4f}</b><br>"
+                                       + gb_subtitle),
+                                 font=dict(size=16), x=0.5, xanchor="center",
+                             )}
                          ],
                          label=str(ss + 1),
                      )
@@ -149,9 +164,14 @@ for lr in learning_rates:
     ))
 
 fig.update_layout(
-    title=f"Gradient Boosting — Stage 1/{n_stages}, LR={default_lr}, "
-          f"MSE={all_results[default_lr][0]['mse']:.4f}",
-    width=900, height=700,
+    title=dict(
+        text=(f"<b>Gradient Boosting — Stage 1/{n_stages}, LR={default_lr}, "
+              f"MSE={all_results[default_lr][0]['mse']:.4f}</b><br>"
+              + gb_subtitle),
+        font=dict(size=16), x=0.5, xanchor="center",
+    ),
+    width=900, height=750,
+    margin=dict(l=60, r=40, t=80, b=110),
     xaxis2=dict(title="X"),
     yaxis=dict(title="y"),
     yaxis2=dict(title="Residual"),
@@ -168,6 +188,17 @@ fig.update_layout(
         pad=dict(t=60),
         steps=steps,
     )],
+    annotations=[
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text="Top: <span style='color:#3b82f6'><b>Blue</b></span> = true function, "
+                  "<span style='color:#ef4444'><b>Red</b></span> = model prediction | "
+                  "Bottom: residuals",
+             showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text="Drag stage slider: prediction converges to truth. Try different learning rates "
+                  "\u2014 slower = more stages needed but better generalization.",
+             showarrow=False, font=dict(size=11, color="#6b7280")),
+    ],
 )
 
 # ── Main ────────────────────────────────────────────────────────

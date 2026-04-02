@@ -222,6 +222,24 @@ def create_tree_splits_figure(max_depth=8):
         height=700,
     )
     layout.sliders = sliders
+    layout.title = dict(
+        text=(
+            "<b>Decision Tree: Splitting Feature Space</b><br>"
+            "<span style='font-size:13px; color:#6b7280'>Depth slider adds axis-aligned split planes</span>"
+        ),
+        font=dict(size=16), x=0.5, xanchor="center",
+    )
+    layout.margin = dict(l=20, r=20, t=60, b=110)
+    layout.annotations = [
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text="<span style='color:#10b981'><b>Green</b></span> = no default | "
+                  "<span style='color:#ef4444'><b>Red</b></span> = default | "
+                  "Colored planes = tree splits",
+             showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text="Rotate the 3D scatter. Drag depth slider: more splits = smaller boxes = overfitting risk.",
+             showarrow=False, font=dict(size=11, color="#6b7280")),
+    ]
     fig.update_layout(layout)
 
     return fig

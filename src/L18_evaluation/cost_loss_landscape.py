@@ -151,17 +151,20 @@ layout = make_3d_layout(
     width=950, height=720,
 )
 layout.update(
+    title=dict(text=(
+        "<b>Cost-Sensitive Classification: Optimal Threshold</b><br>"
+        "<span style='font-size:13px; color:#6b7280'>Optimal threshold shifts with cost asymmetry</span>"
+    ), font=dict(size=16), x=0.5, xanchor="center"),
+    margin=dict(l=20, r=20, t=60, b=110),
     sliders=sliders,
     annotations=[
-        dict(
-            text="The <b>valley</b> shows where cost is minimized. "
-                 "Optimal threshold shifts as imbalance and cost ratio change.",
-            xref="paper", yref="paper",
-            x=0.5, y=-0.02,
-            showarrow=False,
-            font=dict(size=12, color=COLORS["gray"]),
-            xanchor="center",
-        ),
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text="Surface height = total misclassification cost | "
+                  "<span style='color:#ef4444'>Diamond</span> = optimal threshold",
+             showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text="Drag cost ratio slider: when false negatives are expensive, optimal threshold moves left (lower, more conservative).",
+             showarrow=False, font=dict(size=11, color="#6b7280")),
     ],
 )
 layout.scene.camera = dict(eye=dict(x=1.8, y=-1.5, z=1.0))

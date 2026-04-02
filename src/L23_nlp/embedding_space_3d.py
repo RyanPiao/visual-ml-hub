@@ -218,6 +218,26 @@ layout = make_3d_layout(
     width=950, height=720,
 )
 layout.update(
+    title=dict(text=(
+        f"<b>Document Embeddings: FOMC Minutes in 3D Space ({method_label})</b><br>"
+        "<span style='font-size:13px; color:#6b7280'>Semantic similarity &rarr; spatial proximity</span>"
+    ), font=dict(size=16), x=0.5, xanchor="center"),
+    margin=dict(l=20, r=20, t=60, b=110),
+    annotations=[
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text=(
+                 "<span style='color:#ef4444'><b>Red</b></span> = Hawkish | "
+                 "<span style='color:#10b981'><b>Green</b></span> = Dovish | "
+                 "<span style='color:#3b82f6'><b>Blue</b></span> = Neutral | "
+                 "<span style='color:#6b7280'><b>Gray</b></span> = Uncertain"
+             ), showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text=(
+                 "Rotate to see clusters. Filter by decade: notice how Fed language drifts over time. "
+                 "Similar documents cluster together in embedding space."
+             ),
+             showarrow=False, font=dict(size=11, color="#6b7280")),
+    ],
     sliders=[dict(
         active=0,
         currentvalue=dict(prefix="Decade: "),

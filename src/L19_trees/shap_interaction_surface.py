@@ -164,6 +164,15 @@ layout = make_3d_layout(
     width=950, height=720,
 )
 layout.update(
+    title=dict(
+        text=(
+            "<b>Feature Interactions: SHAP Interaction Surface</b><br>"
+            "<span style='font-size:13px; color:#6b7280'>"
+            "Flat surface = additive features, Curved = interaction effect</span>"
+        ),
+        font=dict(size=16), x=0.5, xanchor="center",
+    ),
+    margin=dict(l=20, r=20, t=60, b=110),
     updatemenus=[dict(
         type="dropdown",
         buttons=buttons,
@@ -176,20 +185,22 @@ layout.update(
     annotations=[
         dict(
             text="<b>Curved surface</b> = multiplicative interaction &nbsp;|&nbsp; "
-                 "<b>Flat plane</b> = purely additive (no interaction)",
+                 "<b>Flat plane</b> = purely additive (no interaction) &nbsp;|&nbsp; "
+                 "SHAP method: " + ("TreeExplainer" if HAS_SHAP else "finite-difference approx."),
             xref="paper", yref="paper",
-            x=0.5, y=-0.02,
+            x=0.5, y=-0.15,
             showarrow=False,
-            font=dict(size=12, color=COLORS["gray"]),
+            font=dict(size=12),
             xanchor="center",
         ),
         dict(
-            text="SHAP method: " + ("TreeExplainer" if HAS_SHAP else "finite-difference approx."),
+            text="Switch feature pairs in dropdown. A curved/twisted surface means the two features "
+                 "interact \u2014 one feature's effect depends on the other.",
             xref="paper", yref="paper",
-            x=0.98, y=-0.05,
+            x=0.5, y=-0.22,
             showarrow=False,
-            font=dict(size=10, color=COLORS["gray"]),
-            xanchor="right",
+            font=dict(size=11, color="#6b7280"),
+            xanchor="center",
         ),
     ],
 )

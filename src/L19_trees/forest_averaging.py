@@ -135,9 +135,13 @@ def create_forest_figure(n_trees=100):
             args=[
                 {"visible": visibility},
                 {"title": dict(
-                    text=(f"Random Forest: B = {b} tree{'s' if b > 1 else ''} "
-                          f"(RMSE = {rmse:.3f})"),
-                    font=dict(size=18),
+                    text=(
+                        f"<b>Random Forest: B = {b} tree{'s' if b > 1 else ''} "
+                        f"(RMSE = {rmse:.3f})</b><br>"
+                        "<span style='font-size:13px; color:#6b7280'>"
+                        "Drag B slider to see variance reduction via averaging</span>"
+                    ),
+                    font=dict(size=16), x=0.5, xanchor="center",
                 )},
             ],
             label=str(b),
@@ -163,14 +167,24 @@ def create_forest_figure(n_trees=100):
         height=700,
     )
     layout.sliders = sliders
-
-    # Add annotation
+    layout.title = dict(
+        text=(
+            f"<b>Random Forest: B = 1 tree (RMSE = {rmse_1:.3f})</b><br>"
+            "<span style='font-size:13px; color:#6b7280'>"
+            "Drag B slider to see variance reduction via averaging</span>"
+        ),
+        font=dict(size=16), x=0.5, xanchor="center",
+    )
+    layout.margin = dict(l=20, r=20, t=60, b=110)
     layout.annotations = [
-        dict(
-            text="Gold = true function | Blue = forest prediction",
-            x=0.5, y=0, xref="paper", yref="paper",
-            showarrow=False, font=dict(size=12, color=COLORS["gray"]),
-        )
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text="<span style='color:#eab308'><b>Gold</b></span> = true function | "
+                  "<span style='color:#1357c9'><b>Blue</b></span> = forest prediction",
+             showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text="Drag B slider: 1 tree = blocky staircase, 100 trees = smooth surface. "
+                  "Averaging reduces variance.",
+             showarrow=False, font=dict(size=11, color="#6b7280")),
     ]
 
     fig.update_layout(layout)

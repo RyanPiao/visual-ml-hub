@@ -132,10 +132,18 @@ for name in frame_names:
     ))
 
 fig.update_layout(
-    title="Bootstrap Sampling — Original Data",
+    title=dict(
+        text=(
+            "<b>Bootstrap Sampling</b><br>"
+            "<span style='font-size:13px; color:#6b7280'>"
+            "~63% sampled, ~37% out-of-bag per bootstrap</span>"
+        ),
+        font=dict(size=16), x=0.5, xanchor="center",
+    ),
     xaxis=dict(title="Observation"),
     yaxis=dict(title="Value", range=[values.min() - 3, values.max() + 4]),
-    width=950, height=550,
+    width=950, height=600,
+    margin=dict(l=60, r=40, t=80, b=110),
     updatemenus=[dict(
         type="buttons",
         showactive=False,
@@ -163,6 +171,16 @@ fig.update_layout(
         pad=dict(t=60),
         steps=slider_steps,
     )],
+    annotations=[
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text="<span style='color:#10b981'><b>Green</b></span> = in sample | "
+                  "<span style='color:#6b7280'><b>Gray</b></span> = out-of-bag (OOB)",
+             showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text="Press Play: each frame is one bootstrap sample. Some points appear 2-3x "
+                  "(tall bars), others are left out (OOB \u2014 free validation).",
+             showarrow=False, font=dict(size=11, color="#6b7280")),
+    ],
 )
 
 # ── Main ────────────────────────────────────────────────────────

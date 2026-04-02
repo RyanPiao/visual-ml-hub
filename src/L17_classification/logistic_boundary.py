@@ -92,15 +92,31 @@ for k, C in enumerate(C_values):
     steps.append(dict(
         method="update",
         args=[{"visible": vis},
-              {"title": f"Logistic Regression Decision Boundary — C = {C}"}],
+              {"title": dict(text=(
+                  f"<b>Logistic Regression Decision Boundary — C = {C}</b><br>"
+                  "<span style='font-size:13px; color:#6b7280'>Decision boundary at P = 0.5</span>"
+              ), font=dict(size=16), x=0.5, xanchor="center")}],
         label=str(C),
     ))
 
 fig.update_layout(
-    title="Logistic Regression Decision Boundary — C = 1",
+    title=dict(text=(
+        "<b>Logistic Regression Decision Boundary</b><br>"
+        "<span style='font-size:13px; color:#6b7280'>Decision boundary at P = 0.5</span>"
+    ), font=dict(size=16), x=0.5, xanchor="center"),
     xaxis=dict(title="Feature 1"),
     yaxis=dict(title="Feature 2", scaleanchor="x"),
-    width=800, height=650,
+    width=800, height=700,
+    margin=dict(l=60, r=40, t=80, b=110),
+    annotations=[
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text="<span style='color:#10b981'><b>Green</b></span> = class 0 | "
+                  "<span style='color:#ef4444'><b>Red</b></span> = class 1 | Contour = P(class=1)",
+             showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text="Drag C slider: low C = smooth boundary (underfitting), high C = wiggly boundary (overfitting).",
+             showarrow=False, font=dict(size=11, color="#6b7280")),
+    ],
     sliders=[dict(
         active=2,
         currentvalue=dict(prefix="C = "),

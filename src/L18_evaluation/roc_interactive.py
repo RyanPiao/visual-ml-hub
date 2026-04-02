@@ -98,42 +98,68 @@ for k in range(len(thresholds)):
         args=[
             {"x": [[0, 1], fprs.tolist(), [fprs[k]]],
              "y": [[0, 1], tprs.tolist(), [tprs[k]]]},
-            {"annotations": [dict(
-                x=0.98, y=0.05, xref="paper", yref="paper",
-                text=annotation_text,
-                showarrow=False,
-                font=dict(size=13),
-                align="left",
-                bgcolor="rgba(255,255,255,0.9)",
-                bordercolor=COLORS["gray"],
-                borderwidth=1,
-                borderpad=8,
-            )]}
+            {"annotations": [
+                dict(
+                    x=0.98, y=0.05, xref="paper", yref="paper",
+                    text=annotation_text,
+                    showarrow=False,
+                    font=dict(size=13),
+                    align="left",
+                    bgcolor="rgba(255,255,255,0.9)",
+                    bordercolor=COLORS["gray"],
+                    borderwidth=1,
+                    borderpad=8,
+                ),
+                dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+                     text="<span style='color:#1357c9'><b>Blue</b></span> = ROC curve (AUC shaded) | "
+                          "<span style='color:#ef4444'><b>Red dot</b></span> = current operating point | "
+                          "Dashed = random classifier",
+                     showarrow=False, font=dict(size=12)),
+                dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+                     text="Drag threshold slider: moving dot right trades recall for precision. "
+                          "Curve bowing toward top-left = better model.",
+                     showarrow=False, font=dict(size=11, color="#6b7280")),
+            ]}
         ],
         label=f"{thresholds[k]:.2f}",
     ))
 
 fig.update_layout(
-    title="Interactive ROC Curve — Random Forest",
+    title=dict(text=(
+        f"<b>Interactive ROC Curve — Random Forest</b><br>"
+        f"<span style='font-size:13px; color:#6b7280'>AUC = {auc_val:.3f}</span>"
+    ), font=dict(size=16), x=0.5, xanchor="center"),
     xaxis=dict(title="False Positive Rate", range=[-0.02, 1.02]),
     yaxis=dict(title="True Positive Rate", range=[-0.02, 1.02],
                scaleanchor="x"),
-    width=800, height=700,
-    annotations=[dict(
-        x=0.98, y=0.05, xref="paper", yref="paper",
-        text=(f"<b>Threshold:</b> {thresholds[init_idx]:.2f}<br>"
-              f"<b>TPR (Recall):</b> {tprs[init_idx]:.3f}<br>"
-              f"<b>FPR:</b> {fprs[init_idx]:.3f}<br>"
-              f"<b>Precision:</b> {precisions[init_idx]:.3f}<br>"
-              f"<b>Accuracy:</b> {accuracies[init_idx]:.3f}"),
-        showarrow=False,
-        font=dict(size=13),
-        align="left",
-        bgcolor="rgba(255,255,255,0.9)",
-        bordercolor=COLORS["gray"],
-        borderwidth=1,
-        borderpad=8,
-    )],
+    width=800, height=750,
+    margin=dict(l=60, r=40, t=80, b=110),
+    annotations=[
+        dict(
+            x=0.98, y=0.05, xref="paper", yref="paper",
+            text=(f"<b>Threshold:</b> {thresholds[init_idx]:.2f}<br>"
+                  f"<b>TPR (Recall):</b> {tprs[init_idx]:.3f}<br>"
+                  f"<b>FPR:</b> {fprs[init_idx]:.3f}<br>"
+                  f"<b>Precision:</b> {precisions[init_idx]:.3f}<br>"
+                  f"<b>Accuracy:</b> {accuracies[init_idx]:.3f}"),
+            showarrow=False,
+            font=dict(size=13),
+            align="left",
+            bgcolor="rgba(255,255,255,0.9)",
+            bordercolor=COLORS["gray"],
+            borderwidth=1,
+            borderpad=8,
+        ),
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text="<span style='color:#1357c9'><b>Blue</b></span> = ROC curve (AUC shaded) | "
+                  "<span style='color:#ef4444'><b>Red dot</b></span> = current operating point | "
+                  "Dashed = random classifier",
+             showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text="Drag threshold slider: moving dot right trades recall for precision. "
+                  "Curve bowing toward top-left = better model.",
+             showarrow=False, font=dict(size=11, color="#6b7280")),
+    ],
     sliders=[dict(
         active=init_idx,
         currentvalue=dict(prefix="Threshold: "),

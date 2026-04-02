@@ -122,6 +122,26 @@ layout = make_3d_layout(
 )
 
 layout.update(
+    title=dict(text=(
+        "<b>Time Series Decomposition: Trend + Seasonal + Residual</b><br>"
+        "<span style='font-size:13px; color:#6b7280'>Original = Trend + Seasonal + Residual</span>"
+    ), font=dict(size=16), x=0.5, xanchor="center"),
+    margin=dict(l=20, r=20, t=60, b=110),
+    annotations=[
+        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
+             text=(
+                 "<span style='color:#1a1c1c'><b>Black</b></span> = original | "
+                 "<span style='color:#3b82f6'><b>Blue</b></span> = trend | "
+                 "<span style='color:#f97316'><b>Orange</b></span> = seasonal | "
+                 "<span style='color:#6b7280'><b>Gray</b></span> = residual"
+             ), showarrow=False, font=dict(size=12)),
+        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
+             text=(
+                 "Drag smoothing slider: wider window = smoother trend but may miss short-term changes. "
+                 "Large residuals = model is missing something."
+             ),
+             showarrow=False, font=dict(size=11, color="#6b7280")),
+    ],
     sliders=[dict(
         active=0,
         currentvalue=dict(prefix="Smoothing window: ", suffix=" months"),
