@@ -1,8 +1,12 @@
 """
-SHAP Waterfall Chart
-Train RandomForestClassifier on synthetic loan data.
-Horizontal bar chart of SHAP values for individual observations.
-Dropdown to select observation index (0-9).
+SHAP Waterfall Chart — Feature Attribution for Individual Predictions
+
+Shows how each feature pushes a prediction toward or away from default.
+Red bars = pushes toward default, Blue bars = pushes away.
+Dropdown to select different observations.
+
+Course:  Econ 5200 / 3916
+Topic:   Lecture 19 — Tree-Based Models: SHAP Interpretability
 """
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -10,6 +14,7 @@ from base_ml_viz import COLORS, make_3d_layout
 
 import numpy as np
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from sklearn.ensemble import RandomForestClassifier
 
 np.random.seed(42)
@@ -19,159 +24,157 @@ n = 300
 feature_names = ["Income", "Credit Score", "Loan Amount",
                  "Employment Years", "Debt Ratio"]
 
-income = np.random.lognormal(10.5, 0.5, n)
-credit = np.random.normal(700, 80, n).clip(300, 850)
-loan_amount = np.random.lognormal(10, 0.8, n)
-employment = np.random.exponential(5, n).clip(0, 40)
-debt_ratio = np.random.beta(2, 5, n)
+rng = np.random.RandomState(42)
+income = rng.lognormal(10.5, 0.5, n)
+credit = rng.normal(700, 80, n).clip(300, 850)
+loan_amount = rng.lognormal(10, 0.8, n)
+employment = rng.exponential(5, n).clip(0, 40)
+debt_ratio = rng.beta(2, 5, n)
 
 X = np.column_stack([income, credit, loan_amount, employment, debt_ratio])
-
-# Generate labels: higher default prob with low credit, high debt, high loan
 logit = (-0.00005 * income + 0.008 * (700 - credit) +
          0.00003 * loan_amount - 0.05 * employment + 3 * debt_ratio - 1)
 prob = 1 / (1 + np.exp(-logit))
-y = (np.random.rand(n) < prob).astype(int)
+y = (rng.rand(n) < prob).astype(int)
 
-# ── Train model ─────────────────────────────────────────────────
 clf = RandomForestClassifier(n_estimators=100, max_depth=6, random_state=42)
 clf.fit(X, y)
 
-# ── Compute SHAP values using TreeExplainer ─────────────────────
+# ── Compute SHAP values ────────────────────────────────────────
 try:
     import shap
     explainer = shap.TreeExplainer(clf)
     shap_values_all = explainer.shap_values(X[:10])
-    # Handle different SHAP output formats:
-    # Old shap: list of 2 arrays, each (n, features)
-    # New shap: single array (n, features, 2)
     if isinstance(shap_values_all, list):
-        shap_matrix = shap_values_all[1]  # (10, 5)
+        shap_matrix = shap_values_all[1]
     elif shap_values_all.ndim == 3:
-        shap_matrix = shap_values_all[:, :, 1]  # (10, 5) — class 1
+        shap_matrix = shap_values_all[:, :, 1]
     else:
         shap_matrix = shap_values_all
     base_value = explainer.expected_value
     if isinstance(base_value, (list, np.ndarray)):
         base_value = float(base_value[1]) if len(base_value) > 1 else float(base_value[0])
 except ImportError:
-    # Fallback: approximate SHAP with permutation-based approach
-    print("shap not installed; using permutation-importance approximation.")
-    from sklearn.inspection import permutation_importance
     base_value = clf.predict_proba(X)[:, 1].mean()
     shap_matrix = np.zeros((10, 5))
     for i in range(10):
-        pred_i = clf.predict_proba(X[i:i+1])[:, 1][0]
+        pred_i = clf.predict_proba(X[i:i + 1])[:, 1][0]
         for j in range(5):
-            X_perm = X[i:i+1].copy()
-            orig_val = X_perm[0, j]
-            # Replace with column mean and measure change
+            X_perm = X[i:i + 1].copy()
             X_perm[0, j] = X[:, j].mean()
             pred_perm = clf.predict_proba(X_perm)[:, 1][0]
             shap_matrix[i, j] = pred_i - pred_perm
 
-# ── Build figure with dropdown for observations 0-9 ─────────────
+
+def build_obs_data(obs_idx):
+    """Prepare sorted SHAP data for one observation."""
+    sv = shap_matrix[obs_idx]
+    si = np.argsort(np.abs(sv))  # ascending by magnitude
+    features = [feature_names[int(i)] for i in si]
+    shap_sorted = sv[si]
+    raw_sorted = X[obs_idx, si]
+    colors = [COLORS["negative"] if v > 0 else COLORS["secondary"] for v in shap_sorted]
+    labels = [f"  {v:+.3f}  ({feature_names[int(si[k])]} = {raw_sorted[k]:,.1f})"
+              for k, v in enumerate(shap_sorted)]
+    output = base_value + sv.sum()
+    pred = "Default" if clf.predict(X[obs_idx:obs_idx + 1])[0] == 1 else "No Default"
+    return features, shap_sorted, colors, labels, output, pred
+
+
+# ── Initial observation ────────────────────────────────────────
+features_0, shap_0, colors_0, labels_0, output_0, pred_0 = build_obs_data(0)
+
 fig = go.Figure()
 
-# Add bars for observation 0 initially
-obs_idx = 0
-shap_vals = shap_matrix[obs_idx]
-sorted_idx = np.argsort(np.abs(shap_vals))  # ascending abs value (numpy array)
-sorted_features = [feature_names[int(i)] for i in sorted_idx]
-sorted_shap = shap_vals[sorted_idx]
-sorted_raw = X[obs_idx, sorted_idx]
-
-bar_colors = [COLORS["negative"] if v > 0 else COLORS["secondary"]
-              for v in sorted_shap]
-
+# Bar trace — SHAP values
 fig.add_trace(go.Bar(
-    y=sorted_features,
-    x=sorted_shap,
+    y=features_0,
+    x=shap_0.tolist(),
     orientation="h",
-    marker=dict(color=bar_colors, line=dict(width=1, color="white")),
-    text=[f"{v:+.3f} ({feature_names[sorted_idx[k]]}={sorted_raw[k]:.1f})"
-          for k, v in enumerate(sorted_shap)],
-    textposition="auto",
-    hovertemplate="%{y}: SHAP=%{x:.3f}<extra></extra>",
+    marker=dict(color=colors_0, line=dict(width=0.5, color="white")),
+    text=labels_0,
+    textposition="outside",
+    textfont=dict(size=11),
+    hovertemplate="%{y}: SHAP = %{x:.4f}<extra></extra>",
+    showlegend=False,
+    name="SHAP Values",
 ))
 
-# Base value line
-model_output = base_value + shap_vals.sum()
-fig.add_trace(go.Scatter(
-    x=[0, 0], y=[sorted_features[0], sorted_features[-1]],
-    mode="lines",
-    line=dict(color=COLORS["gray"], dash="dash", width=1),
-    showlegend=False,
-))
+# Zero reference line
+fig.add_vline(x=0, line=dict(color=COLORS["gray"], dash="dash", width=1))
 
 # ── Dropdown buttons ────────────────────────────────────────────
 buttons = []
 for obs in range(10):
-    sv = shap_matrix[obs]
-    si = np.argsort(np.abs(sv))
-    sf = [feature_names[int(i)] for i in si]
-    ss = sv[si]
-    sr = X[obs, si]
-    bc = [COLORS["negative"] if v > 0 else COLORS["secondary"] for v in ss]
-    mo = base_value + sv.sum()
-    pred_label = "Default" if clf.predict(X[obs:obs+1])[0] == 1 else "No Default"
-
+    f, s, c, lab, out, pred = build_obs_data(obs)
     buttons.append(dict(
-        label=f"Obs {obs} ({pred_label})",
+        label=f"Obs {obs} ({pred})",
         method="update",
         args=[
-            {
-                "y": [sf, [sf[0], sf[-1]]],
-                "x": [ss.tolist(), [0, 0]],
-                "marker": [dict(color=bc, line=dict(width=1, color="white")), None],
-                "text": [[f"{v:+.3f} ({feature_names[si[k]]}={sr[k]:.1f})"
-                          for k, v in enumerate(ss)], None],
-            },
-            {
-                "title": (f"SHAP Waterfall — Obs {obs} | "
-                          f"Base: {base_value:.3f} | "
-                          f"Output: {mo:.3f} | "
-                          f"Pred: {pred_label}"),
-                "annotations": [dict(
-                    x=0, y=-0.12, xref="paper", yref="paper",
-                    text=(f"<b>Red</b> = pushes toward default | "
-                          f"<b>Blue</b> = pushes away from default | "
-                          f"Base value: {base_value:.3f}"),
-                    showarrow=False, font=dict(size=11),
-                )],
-            }
+            {"y": [f], "x": [s.tolist()],
+             "marker": [dict(color=c, line=dict(width=0.5, color="white"))],
+             "text": [lab]},
+            {"title.text": (
+                f"<b>SHAP Feature Attribution</b> — Observation {obs}<br>"
+                f"<span style='font-size:13px; color:{COLORS['gray']}'>"
+                f"Base rate: {base_value:.3f}  |  Model output: {out:.3f}  |  "
+                f"Prediction: <b>{pred}</b></span>"
+            )},
         ],
     ))
 
-pred0 = "Default" if clf.predict(X[0:1])[0] == 1 else "No Default"
-mo0 = base_value + shap_matrix[0].sum()
-
+# ── Layout ──────────────────────────────────────────────────────
 fig.update_layout(
-    title=f"SHAP Waterfall — Obs 0 | Base: {base_value:.3f} | "
-          f"Output: {mo0:.3f} | Pred: {pred0}",
-    xaxis=dict(title="SHAP Value (impact on default probability)"),
-    yaxis=dict(title=""),
-    width=900, height=550,
+    title=dict(text=(
+        f"<b>SHAP Feature Attribution</b> — Observation 0<br>"
+        f"<span style='font-size:13px; color:{COLORS['gray']}'>"
+        f"Base rate: {base_value:.3f}  |  Model output: {output_0:.3f}  |  "
+        f"Prediction: <b>{pred_0}</b></span>"
+    ), font=dict(size=16), x=0.5, xanchor="center"),
+    xaxis=dict(
+        title="SHAP Value (impact on default probability)",
+        zeroline=True,
+        zerolinecolor=COLORS["gray"],
+    ),
+    yaxis=dict(
+        title="",
+        automargin=True,  # KEY FIX: auto-expand margin to fit labels
+    ),
+    width=950,
+    height=580,
+    margin=dict(l=150, r=40, t=100, b=120),  # generous left margin for labels
     updatemenus=[dict(
-        type="dropdown",
-        direction="down",
-        x=0.02, xanchor="left",
-        y=1.15, yanchor="top",
+        type="dropdown", direction="down",
+        x=0.0, xanchor="left", y=1.18, yanchor="top",
         buttons=buttons,
+        bgcolor="white",
+        bordercolor=COLORS["gray"],
     )],
-    annotations=[dict(
-        x=0, y=-0.12, xref="paper", yref="paper",
-        text=(f"<b>Red</b> = pushes toward default | "
-              f"<b>Blue</b> = pushes away from default | "
-              f"Base value: {base_value:.3f}"),
-        showarrow=False, font=dict(size=11),
-    )],
+    annotations=[
+        # Legend explanation
+        dict(
+            x=0.5, y=-0.18, xref="paper", yref="paper",
+            text=(
+                "<span style='color:#ef4444'><b>Red</b></span> = pushes toward default  |  "
+                "<span style='color:#3b82f6'><b>Blue</b></span> = pushes away from default"
+            ),
+            showarrow=False, font=dict(size=12),
+        ),
+        # Context explanation
+        dict(
+            x=0.5, y=-0.25, xref="paper", yref="paper",
+            text=(
+                "Each bar shows how much one feature shifts the prediction from the base rate. "
+                "Longer bars = stronger influence."
+            ),
+            showarrow=False, font=dict(size=11, color=COLORS["gray"]),
+        ),
+    ],
 )
 
-# ── Main ────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    out = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                       "shap_waterfall.html")
-    fig.write_html(out, include_plotlyjs="cdn")
-    print(f"Saved to {out}")
+    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "shap_waterfall.html")
+    fig.write_html(out_path, include_plotlyjs="cdn")
+    print(f"Saved to {out_path}")
     fig.show()
