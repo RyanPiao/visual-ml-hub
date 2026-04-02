@@ -133,8 +133,7 @@ for dec in DECADES:
                     colorscale="Viridis",
                     colorbar=dict(title=cbar_title, len=0.5),
                     opacity=0.85,
-                    line=dict(width=0.5, color="white"),
-                ),
+                    line=dict(width=0.5, color="white")),
                 text=snippets[mask],
                 customdata=np.column_stack([
                     cat_labels[mask], years[mask].astype(str),
@@ -146,8 +145,7 @@ for dec in DECADES:
                     "Uncertainty: %{customdata[2]}<extra></extra>"
                 ),
                 name=f"{dec} / {cm}",
-                visible=False,
-            ))
+                visible=False))
         else:
             # One trace per category for legend
             for ci, cat in enumerate(CATEGORIES):
@@ -161,8 +159,7 @@ for dec in DECADES:
                         size=importance[cat_mask] * 5 + 3,
                         color=CAT_COLORS[ci],
                         opacity=0.85,
-                        line=dict(width=0.5, color="white"),
-                    ),
+                        line=dict(width=0.5, color="white")),
                     text=snippets[cat_mask],
                     customdata=np.column_stack([
                         cat_labels[cat_mask], years[cat_mask].astype(str),
@@ -174,8 +171,7 @@ for dec in DECADES:
                         "Uncertainty: %{customdata[2]}<extra></extra>"
                     ),
                     name=cat,
-                    visible=False,
-                ))
+                    visible=False))
 
         idx_end = len(fig.data)
         trace_groups.append((dec, cm, list(range(idx_start, idx_end))))
@@ -201,58 +197,37 @@ for di, dec in enumerate(DECADES):
     slider_steps.append(dict(
         method="update",
         args=[{"visible": make_visibility(dec, "category")}],
-        label=dec,
-    ))
+        label=dec))
 
 dropdown_buttons = []
 for cm in COLOR_MODES:
     dropdown_buttons.append(dict(
         method="update",
         args=[{"visible": make_visibility("All", cm)}],
-        label=cm.replace("_", " ").title(),
-    ))
+        label=cm.replace("_", " ").title()))
 
 layout = make_3d_layout(
     title=f"Document Embeddings: FOMC Minutes in 3D Space ({method_label})",
     x_title="Dim 1", y_title="Dim 2", z_title="Dim 3",
-    width=950, height=720,
-)
+    width=950, height=720)
 layout.update(
     title=dict(text=(
         f"<b>Document Embeddings: FOMC Minutes in 3D Space ({method_label})</b><br>"
         "<span style='font-size:13px; color:#6b7280'>Semantic similarity &rarr; spatial proximity</span>"
     ), font=dict(size=16), x=0.5, xanchor="center"),
     margin=dict(l=20, r=20, t=60, b=110),
-    annotations=[
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text=(
-                 "<span style='color:#ef4444'><b>Red</b></span> = Hawkish | "
-                 "<span style='color:#10b981'><b>Green</b></span> = Dovish | "
-                 "<span style='color:#3b82f6'><b>Blue</b></span> = Neutral | "
-                 "<span style='color:#6b7280'><b>Gray</b></span> = Uncertain"
-             ), showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text=(
-                 "Rotate to see clusters. Filter by decade: notice how Fed language drifts over time. "
-                 "Similar documents cluster together in embedding space."
-             ),
-             showarrow=False, font=dict(size=11, color="#6b7280")),
-    ],
-    sliders=[dict(
+        sliders=[dict(
         active=0,
         currentvalue=dict(prefix="Decade: "),
         pad=dict(t=60),
-        steps=slider_steps,
-    )],
+        steps=slider_steps)],
     updatemenus=[dict(
         type="dropdown",
         buttons=dropdown_buttons,
         x=0.02, y=0.98,
         xanchor="left", yanchor="top",
-        bgcolor="white",
-    )],
-    legend=dict(orientation="v", x=1.02, y=0.95),
-)
+        bgcolor="white")],
+    legend=dict(orientation="v", x=1.02, y=0.95))
 fig.update_layout(layout)
 
 # ------------------------------------------------------------------

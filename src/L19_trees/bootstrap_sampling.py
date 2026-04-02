@@ -44,11 +44,9 @@ frames.append(go.Frame(
                     line=dict(width=1, color="white")),
         text=[f"{v:.1f}" for v in values],
         textposition="outside",
-        opacity=1.0,
-    )],
+        opacity=1.0)],
     name="Original",
-    layout=go.Layout(title="Bootstrap Sampling — Original Data"),
-))
+    layout=go.Layout(title="Bootstrap Sampling — Original Data")))
 
 # Frames 1-5: bootstrap samples
 for b in range(n_bootstrap):
@@ -73,17 +71,14 @@ for b in range(n_bootstrap):
             marker=dict(
                 color=colors,
                 line=dict(width=1, color="white"),
-                opacity=bar_opacity,
-            ),
+                opacity=bar_opacity),
             text=texts,
-            textposition="outside",
-        )],
+            textposition="outside")],
         name=f"Sample {b+1}",
         layout=go.Layout(
             title=f"Bootstrap Sample {b+1} — "
                   f"{len(set(sample))}/{n} unique observations drawn"
-        ),
-    ))
+        )))
 
 # Frame 6: OOB summary
 max_oob = oob_count.max() if oob_count.max() > 0 else 1
@@ -105,19 +100,16 @@ frames.append(go.Frame(
         marker=dict(color=summary_colors,
                     line=dict(width=1, color="white")),
         text=[f"OOB:{oob_count[i]}" for i in range(n)],
-        textposition="outside",
-    )],
+        textposition="outside")],
     name="Summary",
     layout=go.Layout(
         title="OOB Summary — Darker = More Often Out-of-Bag"
-    ),
-))
+    )))
 
 # ── Initial figure ──────────────────────────────────────────────
 fig = go.Figure(
     data=frames[0].data,
-    frames=frames,
-)
+    frames=frames)
 
 # ── Slider + play button ────────────────────────────────────────
 slider_steps = []
@@ -128,8 +120,7 @@ for name in frame_names:
         args=[[name], dict(mode="immediate",
                            frame=dict(duration=600, redraw=True),
                            transition=dict(duration=300))],
-        label=name,
-    ))
+        label=name))
 
 fig.update_layout(
     title=dict(
@@ -138,12 +129,11 @@ fig.update_layout(
             "<span style='font-size:13px; color:#6b7280'>"
             "~63% sampled, ~37% out-of-bag per bootstrap</span>"
         ),
-        font=dict(size=16), x=0.5, xanchor="center",
-    ),
+        font=dict(size=16), x=0.5, xanchor="center"),
     xaxis=dict(title="Observation"),
     yaxis=dict(title="Value", range=[values.min() - 3, values.max() + 4]),
     width=950, height=600,
-    margin=dict(l=60, r=40, t=80, b=110),
+    margin=dict(l=60, r=40, t=80, b=80),
     updatemenus=[dict(
         type="buttons",
         showactive=False,
@@ -155,33 +145,18 @@ fig.update_layout(
                  args=[None, dict(
                      frame=dict(duration=1000, redraw=True),
                      fromcurrent=True,
-                     transition=dict(duration=400),
-                 )]),
+                     transition=dict(duration=400))]),
             dict(label="Pause",
                  method="animate",
                  args=[[None], dict(
                      frame=dict(duration=0, redraw=False),
-                     mode="immediate",
-                 )]),
-        ],
-    )],
+                     mode="immediate")]),
+        ])],
     sliders=[dict(
         active=0,
         currentvalue=dict(prefix="Frame: "),
         pad=dict(t=60),
-        steps=slider_steps,
-    )],
-    annotations=[
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text="<span style='color:#10b981'><b>Green</b></span> = in sample | "
-                  "<span style='color:#6b7280'><b>Gray</b></span> = out-of-bag (OOB)",
-             showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text="Press Play: each frame is one bootstrap sample. Some points appear 2-3x "
-                  "(tall bars), others are left out (OOB \u2014 free validation).",
-             showarrow=False, font=dict(size=11, color="#6b7280")),
-    ],
-)
+        steps=slider_steps)])
 
 # ── Main ────────────────────────────────────────────────────────
 if __name__ == "__main__":

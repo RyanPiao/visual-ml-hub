@@ -148,8 +148,7 @@ def create_tree_splits_figure(max_depth=8):
             "Credit: %{y:.0f}<br>"
             "Loan: $%{z:.0f}K<br>"
             "<b>No Default</b><extra></extra>"
-        ),
-    ))
+        )))
 
     # Default points
     mask_1 = y == 1
@@ -164,8 +163,7 @@ def create_tree_splits_figure(max_depth=8):
             "Credit: %{y:.0f}<br>"
             "Loan: $%{z:.0f}K<br>"
             "<b>Default</b><extra></extra>"
-        ),
-    ))
+        )))
 
     n_scatter = 2  # number of always-visible scatter traces
 
@@ -177,8 +175,7 @@ def create_tree_splits_figure(max_depth=8):
             value=sp["value"],
             bounds=sp["bounds"],
             color=color,
-            opacity=0.15,
-        )
+            opacity=0.15)
         mesh.name = f"D{sp['depth']}: {sp['axis_name']} = {sp['value']:.1f}"
         mesh.visible = False
         mesh.showlegend = False
@@ -197,16 +194,14 @@ def create_tree_splits_figure(max_depth=8):
         step = dict(
             method="update",
             args=[{"visible": visibility}],
-            label=str(d),
-        )
+            label=str(d))
         steps.append(step)
 
     sliders = [dict(
         active=3,
         currentvalue=dict(prefix="Tree Depth: ", font=dict(size=14)),
         pad=dict(t=50),
-        steps=steps,
-    )]
+        steps=steps)]
 
     # Set initial visibility (depth=3)
     for i, sp in enumerate(all_splits):
@@ -219,26 +214,16 @@ def create_tree_splits_figure(max_depth=8):
         y_title="Credit Score",
         z_title="Loan ($K)",
         width=900,
-        height=700,
-    )
+        height=700)
     layout.sliders = sliders
     layout.title = dict(
         text=(
             "<b>Decision Tree: Splitting Feature Space</b><br>"
             "<span style='font-size:13px; color:#6b7280'>Depth slider adds axis-aligned split planes</span>"
         ),
-        font=dict(size=16), x=0.5, xanchor="center",
-    )
-    layout.margin = dict(l=20, r=20, t=60, b=110)
+        font=dict(size=16), x=0.5, xanchor="center")
+    layout.margin = dict(l=20, r=20, t=60, b=80)
     layout.annotations = [
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text="<span style='color:#10b981'><b>Green</b></span> = no default | "
-                  "<span style='color:#ef4444'><b>Red</b></span> = default | "
-                  "Colored planes = tree splits",
-             showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text="Rotate the 3D scatter. Drag depth slider: more splits = smaller boxes = overfitting risk.",
-             showarrow=False, font=dict(size=11, color="#6b7280")),
     ]
     fig.update_layout(layout)
 

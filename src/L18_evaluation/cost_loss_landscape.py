@@ -21,8 +21,7 @@ np.random.seed(42)
 # ── Generate base dataset (imbalanced) ──────────────────────────────────
 X_base, y_base = make_classification(
     n_samples=2000, n_features=10, n_informative=6, n_redundant=2,
-    weights=[0.5, 0.5], flip_y=0.05, random_state=42,
-)
+    weights=[0.5, 0.5], flip_y=0.05, random_state=42)
 
 # Train one model on the balanced data — we'll resample test sets
 model = RandomForestClassifier(n_estimators=100, random_state=42)
@@ -101,8 +100,7 @@ for k, ratio in enumerate(cost_ratios):
             "Threshold: %{x:.2f}<br>"
             "Imbalance: %{y:.2f}<br>"
             "Cost: %{z:.3f}<extra></extra>"
-        ),
-    ))
+        )))
 
     # Optimal point marker
     fig.add_trace(go.Scatter3d(
@@ -117,8 +115,7 @@ for k, ratio in enumerate(cost_ratios):
         textfont=dict(size=10, color=COLORS["highlight"]),
         name="Optimal threshold",
         showlegend=is_default,
-        visible=is_default,
-    ))
+        visible=is_default))
 
 # ── Slider ──────────────────────────────────────────────────────────────
 n_per_ratio = 2  # surface + optimal marker
@@ -132,15 +129,13 @@ for k, ratio in enumerate(cost_ratios):
     steps.append(dict(
         method="update",
         args=[{"visible": vis}],
-        label=str(ratio),
-    ))
+        label=str(ratio)))
 
 sliders = [dict(
     active=cost_ratios.index(1.0),
     currentvalue=dict(prefix="FP/FN cost ratio = ", font=dict(size=14)),
     pad=dict(t=40),
-    steps=steps,
-)]
+    steps=steps)]
 
 # ── Layout ──────────────────────────────────────────────────────────────
 layout = make_3d_layout(
@@ -148,25 +143,14 @@ layout = make_3d_layout(
     x_title="Decision Threshold",
     y_title="Class Imbalance Ratio (% positive)",
     z_title="Avg. Misclassification Cost",
-    width=950, height=720,
-)
+    width=950, height=720)
 layout.update(
     title=dict(text=(
         "<b>Cost-Sensitive Classification: Optimal Threshold</b><br>"
         "<span style='font-size:13px; color:#6b7280'>Optimal threshold shifts with cost asymmetry</span>"
     ), font=dict(size=16), x=0.5, xanchor="center"),
-    margin=dict(l=20, r=20, t=60, b=110),
-    sliders=sliders,
-    annotations=[
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text="Surface height = total misclassification cost | "
-                  "<span style='color:#ef4444'>Diamond</span> = optimal threshold",
-             showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text="Drag cost ratio slider: when false negatives are expensive, optimal threshold moves left (lower, more conservative).",
-             showarrow=False, font=dict(size=11, color="#6b7280")),
-    ],
-)
+    margin=dict(l=20, r=20, t=60, b=80),
+    sliders=sliders)
 layout.scene.camera = dict(eye=dict(x=1.8, y=-1.5, z=1.0))
 
 fig.update_layout(layout)

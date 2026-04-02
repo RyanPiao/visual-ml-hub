@@ -91,8 +91,7 @@ fig.add_trace(go.Surface(
         "Income: %{x:.0f}K<br>"
         "Age: %{y:.0f}<br>"
         "Est. CATE: %{z:.2f}<extra>Estimated</extra>"
-    ),
-))
+    )))
 
 # 2. True CATE surface (gold, semi-transparent)
 fig.add_trace(go.Surface(
@@ -105,8 +104,7 @@ fig.add_trace(go.Surface(
         "Income: %{x:.0f}K<br>"
         "Age: %{y:.0f}<br>"
         "True CATE: %{z:.2f}<extra>True</extra>"
-    ),
-))
+    )))
 
 # 3. Contour at CATE = 0 — simple numpy approach (no skimage needed)
 # Walk each row of the grid to find sign changes
@@ -120,13 +118,11 @@ for i in range(GRID):
                 x=[x0], y=[age_grid[i]], z=[0],
                 mode="markers",
                 marker=dict(color="black", size=2),
-                showlegend=False, hoverinfo="skip",
-            ))
+                showlegend=False, hoverinfo="skip"))
 # Add a single legend entry for the contour dots
 fig.add_trace(go.Scatter3d(
     x=[None], y=[None], z=[None], mode="markers",
-    marker=dict(color="black", size=4), name="CATE = 0 boundary",
-))
+    marker=dict(color="black", size=4), name="CATE = 0 boundary"))
 
 # 4. Individual scatter points
 marker_colors = np.where(cate_hat >= 0, COLORS["positive"], COLORS["negative"])
@@ -137,8 +133,7 @@ fig.add_trace(go.Scatter3d(
         size=3,
         color=marker_colors,
         opacity=0.6,
-        line=dict(width=0.3, color="white"),
-    ),
+        line=dict(width=0.3, color="white")),
     name="Individual CATE est.",
     customdata=np.column_stack([
         np.round(cate_hat, 2).astype(str),
@@ -150,8 +145,7 @@ fig.add_trace(go.Scatter3d(
         "Est. CATE: %{customdata[0]}<br>"
         "True CATE: %{customdata[1]}<br>"
         "Treated: %{customdata[2]}<extra></extra>"
-    ),
-))
+    )))
 
 # ------------------------------------------------------------------
 # Layout
@@ -162,31 +156,15 @@ layout = make_3d_layout(
     y_title="Age",
     z_title="CATE (treatment effect)",
     width=950,
-    height=720,
-)
+    height=720)
 layout.update(
     title=dict(text=(
         "<b>Heterogeneous Treatment Effects: Who Benefits Most?</b><br>"
         "<span style='font-size:13px; color:#6b7280'>Who benefits most from treatment?</span>"
     ), font=dict(size=16), x=0.5, xanchor="center"),
-    margin=dict(l=20, r=20, t=60, b=110),
-    annotations=[
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text=(
-                 "<span style='color:#eab308'><b>Gold</b></span> = true CATE | "
-                 "<span style='color:#1357c9'><b>Blue</b></span> = estimated CATE | "
-                 "Black dots = CATE=0 boundary"
-             ), showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text=(
-                 "Peaks = treatment most effective (high-income, young). "
-                 "Valleys = least effective. The CATE=0 boundary shows where treatment effect switches sign."
-             ),
-             showarrow=False, font=dict(size=11, color="#6b7280")),
-    ],
-    scene=dict(camera=dict(eye=dict(x=1.6, y=-1.5, z=1.0))),
-    legend=dict(orientation="v", x=1.08, y=0.95),
-)
+    margin=dict(l=20, r=20, t=60, b=80),
+        scene=dict(camera=dict(eye=dict(x=1.6, y=-1.5, z=1.0))),
+    legend=dict(orientation="v", x=1.08, y=0.95))
 fig.update_layout(layout)
 
 # ------------------------------------------------------------------

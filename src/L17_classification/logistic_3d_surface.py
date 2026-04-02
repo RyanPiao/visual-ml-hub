@@ -20,8 +20,7 @@ np.random.seed(42)
 # ── Generate synthetic 2-feature binary classification data ──────────────
 X, y = make_classification(
     n_samples=200, n_features=2, n_redundant=0, n_informative=2,
-    n_clusters_per_class=1, flip_y=0.1, random_state=42,
-)
+    n_clusters_per_class=1, flip_y=0.1, random_state=42)
 scaler = StandardScaler()
 X = scaler.fit_transform(X)
 
@@ -60,8 +59,7 @@ for cls, color, name in [
         marker=dict(size=4, color=color, opacity=0.8,
                     line=dict(width=0.5, color="white")),
         name=name,
-        showlegend=True,
-    ))
+        showlegend=True))
 
 # Add a surface for each C value; only C=1 visible by default
 for i, C in enumerate(C_values):
@@ -72,8 +70,7 @@ for i, C in enumerate(C_values):
         showscale=False,
         name=f"C={C}",
         visible=(C == 1),
-        hovertemplate="Feature 1: %{x:.2f}<br>Feature 2: %{y:.2f}<br>P(class=1): %{z:.3f}<extra></extra>",
-    ))
+        hovertemplate="Feature 1: %{x:.2f}<br>Feature 2: %{y:.2f}<br>P(class=1): %{z:.3f}<extra></extra>"))
 
 # ── Decision boundary plane at P=0.5 (reference) ───────────────────────
 fig.add_trace(go.Surface(
@@ -83,8 +80,7 @@ fig.add_trace(go.Surface(
     opacity=0.15,
     showscale=False,
     name="P=0.5 boundary",
-    hoverinfo="skip",
-))
+    hoverinfo="skip"))
 
 # ── Slider for regularization C ────────────────────────────────────────
 n_scatter = 2  # two scatter traces (class 0, class 1)
@@ -103,15 +99,13 @@ for i, C in enumerate(C_values):
     steps.append(dict(
         method="update",
         args=[{"visible": visibility}],
-        label=str(C),
-    ))
+        label=str(C)))
 
 sliders = [dict(
     active=2,  # C=1 is index 2
     currentvalue=dict(prefix="Regularization C = ", font=dict(size=14)),
     pad=dict(t=40),
-    steps=steps,
-)]
+    steps=steps)]
 
 # ── Annotations ─────────────────────────────────────────────────────────
 layout = make_3d_layout(
@@ -119,25 +113,14 @@ layout = make_3d_layout(
     x_title="Feature 1",
     y_title="Feature 2",
     z_title="P(class = 1)",
-    width=900, height=700,
-)
+    width=900, height=700)
 layout.update(
     title=dict(text=(
         "<b>Logistic Regression: 3D Decision Surface</b><br>"
         "<span style='font-size:13px; color:#6b7280'>Adjust C slider — steep surface = confident, flat = uncertain</span>"
     ), font=dict(size=16), x=0.5, xanchor="center"),
-    margin=dict(l=20, r=20, t=60, b=110),
-    sliders=sliders,
-    annotations=[
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text="<span style='color:#10b981'><b>Green</b></span> = no default | "
-                  "<span style='color:#ef4444'><b>Red</b></span> = default | Surface = P(default)",
-             showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text="Rotate to see the S-shaped sigmoid surface. Higher C = less regularization = steeper, more complex boundary.",
-             showarrow=False, font=dict(size=11, color="#6b7280")),
-    ],
-)
+    margin=dict(l=20, r=20, t=60, b=80),
+    sliders=sliders)
 layout.scene.zaxis.update(range=[0, 1])
 
 fig.update_layout(layout)

@@ -83,8 +83,7 @@ def make_traces(window, visible=True):
                 f"<b>{name}</b><br>"
                 "Month: %{x}<br>"
                 "Value: %{z:.2f}<extra></extra>"
-            ),
-        ))
+            )))
     return traces
 
 
@@ -109,8 +108,7 @@ for i, w in enumerate(WINDOWS):
     steps.append(dict(
         method="update",
         args=[{"visible": visibility}],
-        label=f"{w}",
-    ))
+        label=f"{w}"))
 
 layout = make_3d_layout(
     title="Time Series Decomposition: Trend + Seasonal + Residual",
@@ -118,36 +116,19 @@ layout = make_3d_layout(
     y_title="Component",
     z_title="Value",
     width=900,
-    height=700,
-)
+    height=700)
 
 layout.update(
     title=dict(text=(
         "<b>Time Series Decomposition: Trend + Seasonal + Residual</b><br>"
         "<span style='font-size:13px; color:#6b7280'>Original = Trend + Seasonal + Residual</span>"
     ), font=dict(size=16), x=0.5, xanchor="center"),
-    margin=dict(l=20, r=20, t=60, b=110),
-    annotations=[
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text=(
-                 "<span style='color:#1a1c1c'><b>Black</b></span> = original | "
-                 "<span style='color:#3b82f6'><b>Blue</b></span> = trend | "
-                 "<span style='color:#f97316'><b>Orange</b></span> = seasonal | "
-                 "<span style='color:#6b7280'><b>Gray</b></span> = residual"
-             ), showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text=(
-                 "Drag smoothing slider: wider window = smoother trend but may miss short-term changes. "
-                 "Large residuals = model is missing something."
-             ),
-             showarrow=False, font=dict(size=11, color="#6b7280")),
-    ],
-    sliders=[dict(
+    margin=dict(l=20, r=20, t=60, b=80),
+        sliders=[dict(
         active=0,
         currentvalue=dict(prefix="Smoothing window: ", suffix=" months"),
         pad=dict(t=40),
-        steps=steps,
-    )],
+        steps=steps)],
     scene=dict(
         yaxis=dict(
             tickvals=[0, 1, 2, 3],
@@ -155,11 +136,8 @@ layout.update(
             title="Component",
             backgroundcolor=COLORS["surface_bg"],
             gridcolor="#e2e2e2",
-            showbackground=True,
-        ),
-        camera=dict(eye=dict(x=1.8, y=-1.4, z=0.9)),
-    ),
-)
+            showbackground=True),
+        camera=dict(eye=dict(x=1.8, y=-1.4, z=0.9))))
 
 fig.update_layout(layout)
 

@@ -99,8 +99,7 @@ for ki, k in enumerate(K_RANGE):
                     color=GROUP_COLORS[g],
                     symbol="circle" if is_match else "x",
                     opacity=0.85,
-                    line=dict(width=0.5, color="white"),
-                ),
+                    line=dict(width=0.5, color="white")),
                 name=f"{GROUP_NAMES[g]} ({'correct' if is_match else 'misclass.'})",
                 visible=(ki == 0),
                 text=[names[j] for j in np.where(mask)[0]],
@@ -114,8 +113,7 @@ for ki, k in enumerate(K_RANGE):
                     "Assigned: %{customdata[1]}<br>"
                     "PC1: %{x:.2f}  PC2: %{y:.2f}  PC3: %{z:.2f}"
                     "<extra></extra>"
-                ),
-            ))
+                )))
 
 # Count traces per K step
 traces_per_k = []
@@ -147,8 +145,7 @@ for ki, k in enumerate(K_RANGE):
     steps.append(dict(
         method="update",
         args=[{"visible": vis}],
-        label=str(k),
-    ))
+        label=str(k)))
     offset += traces_per_k[ki]
 
 layout = make_3d_layout(
@@ -157,34 +154,20 @@ layout = make_3d_layout(
     y_title=f"PC2 ({var_explained[1]:.1f}% var)",
     z_title=f"PC3 ({var_explained[2]:.1f}% var)",
     width=950,
-    height=720,
-)
+    height=720)
 layout.update(
     title=dict(text=(
         "<b>Clustering Economies: PCA Projection with K-Means</b><br>"
         "<span style='font-size:13px; color:#6b7280'>"
         f"3 principal components explain {sum(var_explained):.0f}% of total variance</span>"
     ), font=dict(size=16), x=0.5, xanchor="center"),
-    margin=dict(l=20, r=20, t=60, b=110),
-    annotations=[
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text="Colors = K-Means cluster assignment | <b>X</b> marker = true group differs from cluster",
-             showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text=(
-                 "Drag K slider: more clusters capture finer groups but risk splitting natural categories. "
-                 "Rotate to see separation in 3D."
-             ),
-             showarrow=False, font=dict(size=11, color="#6b7280")),
-    ],
-    sliders=[dict(
+    margin=dict(l=20, r=20, t=60, b=80),
+        sliders=[dict(
         active=0,
         currentvalue=dict(prefix="K = "),
         pad=dict(t=40),
-        steps=steps,
-    )],
-    legend=dict(orientation="v", x=1.02, y=0.95),
-)
+        steps=steps)],
+    legend=dict(orientation="v", x=1.02, y=0.95))
 fig.update_layout(layout)
 
 # ------------------------------------------------------------------

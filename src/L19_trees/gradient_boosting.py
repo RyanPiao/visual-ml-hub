@@ -57,8 +57,7 @@ fig = make_subplots(
     rows=2, cols=1,
     subplot_titles=["Data + Model Prediction", "Residuals"],
     vertical_spacing=0.15,
-    row_heights=[0.6, 0.4],
-)
+    row_heights=[0.6, 0.4])
 
 # Default: lr=0.1, stage=0
 default_lr = 0.1
@@ -68,31 +67,26 @@ d = all_results[default_lr][default_stage]
 # Top subplot: scatter + truth + prediction
 fig.add_trace(go.Scatter(
     x=X, y=y, mode="markers", name="Training Data",
-    marker=dict(color=COLORS["secondary"], size=5, opacity=0.6),
-), row=1, col=1)
+    marker=dict(color=COLORS["secondary"], size=5, opacity=0.6)), row=1, col=1)
 
 fig.add_trace(go.Scatter(
     x=X_plot, y=y_truth, mode="lines", name="True Function",
-    line=dict(color=COLORS["gold"], width=2, dash="dash"),
-), row=1, col=1)
+    line=dict(color=COLORS["gold"], width=2, dash="dash")), row=1, col=1)
 
 fig.add_trace(go.Scatter(
     x=X_plot, y=d["preds_plot"], mode="lines", name="Boosted Prediction",
-    line=dict(color=COLORS["negative"], width=3),
-), row=1, col=1)
+    line=dict(color=COLORS["negative"], width=3)), row=1, col=1)
 
 # Bottom subplot: residuals
 fig.add_trace(go.Scatter(
     x=X, y=d["residuals"], mode="markers", name="Residuals",
     marker=dict(color=COLORS["highlight"], size=5),
-    showlegend=True,
-), row=2, col=1)
+    showlegend=True), row=2, col=1)
 
 fig.add_trace(go.Scatter(
     x=[0, 10], y=[0, 0], mode="lines",
     line=dict(color=COLORS["gray"], dash="dash", width=1),
-    showlegend=False,
-), row=2, col=1)
+    showlegend=False), row=2, col=1)
 
 # ── Slider steps (stage) ───────────────────────────────────────
 # We'll rebuild traces for the active learning rate via dropdown + slider
@@ -114,11 +108,9 @@ for s in range(n_stages):
                 text=(f"<b>Gradient Boosting — Stage {s+1}/{n_stages}, "
                       f"LR={default_lr}, MSE={d['mse']:.4f}</b><br>"
                       + gb_subtitle),
-                font=dict(size=16), x=0.5, xanchor="center",
-            )}
+                font=dict(size=16), x=0.5, xanchor="center")}
         ],
-        label=str(s + 1),
-    ))
+        label=str(s + 1)))
 
 # ── Dropdown for learning rate ──────────────────────────────────
 # Each dropdown button resets slider to stage 0 for that LR
@@ -134,8 +126,7 @@ for lr in learning_rates:
                  text=(f"<b>Gradient Boosting — Stage 1/{n_stages}, "
                        f"LR={lr}, MSE={d['mse']:.4f}</b><br>"
                        + gb_subtitle),
-                 font=dict(size=16), x=0.5, xanchor="center",
-             ),
+                 font=dict(size=16), x=0.5, xanchor="center"),
              "sliders": [dict(
                  active=0,
                  currentvalue=dict(prefix="Stage: "),
@@ -152,24 +143,19 @@ for lr in learning_rates:
                                  text=(f"<b>Gradient Boosting — Stage {ss+1}/{n_stages}, "
                                        f"LR={lr}, MSE={all_results[lr][ss]['mse']:.4f}</b><br>"
                                        + gb_subtitle),
-                                 font=dict(size=16), x=0.5, xanchor="center",
-                             )}
+                                 font=dict(size=16), x=0.5, xanchor="center")}
                          ],
-                         label=str(ss + 1),
-                     )
+                         label=str(ss + 1))
                      for ss in range(n_stages)
-                 ],
-             )]}
-        ],
-    ))
+                 ])]}
+        ]))
 
 fig.update_layout(
     title=dict(
         text=(f"<b>Gradient Boosting — Stage 1/{n_stages}, LR={default_lr}, "
               f"MSE={all_results[default_lr][0]['mse']:.4f}</b><br>"
               + gb_subtitle),
-        font=dict(size=16), x=0.5, xanchor="center",
-    ),
+        font=dict(size=16), x=0.5, xanchor="center"),
     width=900, height=750,
     margin=dict(l=60, r=40, t=80, b=110),
     xaxis2=dict(title="X"),
@@ -180,26 +166,12 @@ fig.update_layout(
         direction="down",
         x=0.02, xanchor="left",
         y=1.18, yanchor="top",
-        buttons=buttons,
-    )],
+        buttons=buttons)],
     sliders=[dict(
         active=0,
         currentvalue=dict(prefix="Stage: "),
         pad=dict(t=60),
-        steps=steps,
-    )],
-    annotations=[
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text="Top: <span style='color:#3b82f6'><b>Blue</b></span> = true function, "
-                  "<span style='color:#ef4444'><b>Red</b></span> = model prediction | "
-                  "Bottom: residuals",
-             showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text="Drag stage slider: prediction converges to truth. Try different learning rates "
-                  "\u2014 slower = more stages needed but better generalization.",
-             showarrow=False, font=dict(size=11, color="#6b7280")),
-    ],
-)
+        steps=steps)])
 
 # ── Main ────────────────────────────────────────────────────────
 if __name__ == "__main__":

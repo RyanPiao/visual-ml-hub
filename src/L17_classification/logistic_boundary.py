@@ -50,8 +50,7 @@ for k, C in enumerate(C_values):
         opacity=0.5,
         visible=visible,
         name=f"C={C}",
-        hoverinfo="skip",
-    ))
+        hoverinfo="skip"))
 
     # Decision boundary line (p=0.5)
     fig.add_trace(go.Contour(
@@ -62,13 +61,11 @@ for k, C in enumerate(C_values):
         contours=dict(
             start=0.5, end=0.5, size=0.1,
             coloring="none",
-            showlabels=False,
-        ),
+            showlabels=False),
         line=dict(color=COLORS["gray"], width=2, dash="dash"),
         visible=visible,
         hoverinfo="skip",
-        showlegend=False,
-    ))
+        showlegend=False))
 
 # Scatter points (always visible)
 for cls, label, color in [(0, "Class 0", COLORS["secondary"]),
@@ -77,8 +74,7 @@ for cls, label, color in [(0, "Class 0", COLORS["secondary"]),
     fig.add_trace(go.Scatter(
         x=X[mask, 0], y=X[mask, 1],
         mode="markers", name=label,
-        marker=dict(color=color, size=7, line=dict(width=1, color="white")),
-    ))
+        marker=dict(color=color, size=7, line=dict(width=1, color="white"))))
 
 # ── Slider ──────────────────────────────────────────────────────
 n_per_C = 2  # contour + boundary line per C value
@@ -96,8 +92,7 @@ for k, C in enumerate(C_values):
                   f"<b>Logistic Regression Decision Boundary — C = {C}</b><br>"
                   "<span style='font-size:13px; color:#6b7280'>Decision boundary at P = 0.5</span>"
               ), font=dict(size=16), x=0.5, xanchor="center")}],
-        label=str(C),
-    ))
+        label=str(C)))
 
 fig.update_layout(
     title=dict(text=(
@@ -107,23 +102,12 @@ fig.update_layout(
     xaxis=dict(title="Feature 1"),
     yaxis=dict(title="Feature 2", scaleanchor="x"),
     width=800, height=700,
-    margin=dict(l=60, r=40, t=80, b=110),
-    annotations=[
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text="<span style='color:#10b981'><b>Green</b></span> = class 0 | "
-                  "<span style='color:#ef4444'><b>Red</b></span> = class 1 | Contour = P(class=1)",
-             showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text="Drag C slider: low C = smooth boundary (underfitting), high C = wiggly boundary (overfitting).",
-             showarrow=False, font=dict(size=11, color="#6b7280")),
-    ],
-    sliders=[dict(
+    margin=dict(l=60, r=40, t=80, b=80),
+        sliders=[dict(
         active=2,
         currentvalue=dict(prefix="C = "),
         pad=dict(t=50),
-        steps=steps,
-    )],
-)
+        steps=steps)])
 
 # ── Main ────────────────────────────────────────────────────────
 if __name__ == "__main__":

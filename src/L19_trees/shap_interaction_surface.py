@@ -123,8 +123,7 @@ for k, (fi, fj, label) in enumerate(pairs):
             f"{feature_names[fi]}: " + "%{x:.2f}<br>" +
             f"{feature_names[fj]}: " + "%{y:.2f}<br>" +
             "Interaction: %{z:.3f}<extra></extra>"
-        ),
-    ))
+        )))
 
     # Scatter of observations
     interaction_vals = shap_interactions[:, fi, fj]
@@ -133,12 +132,10 @@ for k, (fi, fj, label) in enumerate(pairs):
         mode="markers",
         marker=dict(
             size=2.5, color=preds, colorscale="Viridis",
-            opacity=0.5, showscale=False,
-        ),
+            opacity=0.5, showscale=False),
         name="Observations",
         showlegend=is_default,
-        visible=is_default,
-    ))
+        visible=is_default))
 
 # ── Dropdown menu ───────────────────────────────────────────────────────
 n_per_pair = 2  # surface + scatter
@@ -152,8 +149,7 @@ for k, (fi, fj, label) in enumerate(pairs):
         args=[{"visible": vis},
               {"scene.xaxis.title": feature_names[fi],
                "scene.yaxis.title": feature_names[fj]}],
-        label=label,
-    ))
+        label=label))
 
 # ── Layout ──────────────────────────────────────────────────────────────
 layout = make_3d_layout(
@@ -161,8 +157,7 @@ layout = make_3d_layout(
     x_title=feature_names[pairs[0][0]],
     y_title=feature_names[pairs[0][1]],
     z_title="SHAP Interaction Value",
-    width=950, height=720,
-)
+    width=950, height=720)
 layout.update(
     title=dict(
         text=(
@@ -170,9 +165,8 @@ layout.update(
             "<span style='font-size:13px; color:#6b7280'>"
             "Flat surface = additive features, Curved = interaction effect</span>"
         ),
-        font=dict(size=16), x=0.5, xanchor="center",
-    ),
-    margin=dict(l=20, r=20, t=60, b=110),
+        font=dict(size=16), x=0.5, xanchor="center"),
+    margin=dict(l=20, r=20, t=60, b=80),
     updatemenus=[dict(
         type="dropdown",
         buttons=buttons,
@@ -180,30 +174,24 @@ layout.update(
         xanchor="left", yanchor="top",
         bgcolor="white",
         font=dict(size=11),
-        pad=dict(t=10),
-    )],
+        pad=dict(t=10))],
     annotations=[
         dict(
             text="<b>Curved surface</b> = multiplicative interaction &nbsp;|&nbsp; "
                  "<b>Flat plane</b> = purely additive (no interaction) &nbsp;|&nbsp; "
                  "SHAP method: " + ("TreeExplainer" if HAS_SHAP else "finite-difference approx."),
             xref="paper", yref="paper",
-            x=0.5, y=-0.15,
             showarrow=False,
             font=dict(size=12),
-            xanchor="center",
-        ),
+            xanchor="center"),
         dict(
             text="Switch feature pairs in dropdown. A curved/twisted surface means the two features "
                  "interact \u2014 one feature's effect depends on the other.",
             xref="paper", yref="paper",
-            x=0.5, y=-0.22,
             showarrow=False,
             font=dict(size=11, color="#6b7280"),
-            xanchor="center",
-        ),
-    ],
-)
+            xanchor="center"),
+    ])
 
 fig.update_layout(layout)
 

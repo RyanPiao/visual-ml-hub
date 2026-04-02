@@ -104,8 +104,7 @@ def create_forest_figure(n_trees=100):
         opacity=0.35,
         showscale=False,
         name="True Function",
-        hovertemplate="x1: %{x:.1f}<br>x2: %{y:.1f}<br>f(x): %{z:.2f}<extra>Truth</extra>",
-    ))
+        hovertemplate="x1: %{x:.1f}<br>x2: %{y:.1f}<br>f(x): %{z:.2f}<extra>Truth</extra>"))
 
     # -- Ensemble surfaces (one per B, toggle visibility) --
     for i, b in enumerate(B_values):
@@ -118,8 +117,7 @@ def create_forest_figure(n_trees=100):
             visible=(i == 0),  # only B=1 visible initially
             name=f"Ensemble (B={b})",
             hovertemplate="x1: %{x:.1f}<br>x2: %{y:.1f}<br>pred: %{z:.2f}<extra>B=%{text}</extra>",
-            text=np.full_like(Z_ens, str(b)),
-        ))
+            text=np.full_like(Z_ens, str(b))))
 
     # -- Slider --
     steps = []
@@ -141,19 +139,16 @@ def create_forest_figure(n_trees=100):
                         "<span style='font-size:13px; color:#6b7280'>"
                         "Drag B slider to see variance reduction via averaging</span>"
                     ),
-                    font=dict(size=16), x=0.5, xanchor="center",
-                )},
+                    font=dict(size=16), x=0.5, xanchor="center")},
             ],
-            label=str(b),
-        )
+            label=str(b))
         steps.append(step)
 
     sliders = [dict(
         active=0,
         currentvalue=dict(prefix="Number of Trees (B): ", font=dict(size=14)),
         pad=dict(t=60),
-        steps=steps,
-    )]
+        steps=steps)]
 
     # Initial RMSE
     rmse_1 = np.sqrt(np.mean((ensemble_surfaces[B_values[0]] - Z_true) ** 2))
@@ -164,8 +159,7 @@ def create_forest_figure(n_trees=100):
         y_title="Feature 2 (Credit Score)",
         z_title="Prediction",
         width=900,
-        height=700,
-    )
+        height=700)
     layout.sliders = sliders
     layout.title = dict(
         text=(
@@ -173,18 +167,9 @@ def create_forest_figure(n_trees=100):
             "<span style='font-size:13px; color:#6b7280'>"
             "Drag B slider to see variance reduction via averaging</span>"
         ),
-        font=dict(size=16), x=0.5, xanchor="center",
-    )
+        font=dict(size=16), x=0.5, xanchor="center")
     layout.margin = dict(l=20, r=20, t=60, b=110)
     layout.annotations = [
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text="<span style='color:#eab308'><b>Gold</b></span> = true function | "
-                  "<span style='color:#1357c9'><b>Blue</b></span> = forest prediction",
-             showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text="Drag B slider: 1 tree = blocky staircase, 100 trees = smooth surface. "
-                  "Averaging reduces variance.",
-             showarrow=False, font=dict(size=11, color="#6b7280")),
     ]
 
     fig.update_layout(layout)

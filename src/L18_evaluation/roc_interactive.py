@@ -19,8 +19,7 @@ np.random.seed(42)
 # ── Synthetic binary data ───────────────────────────────────────
 X, y = make_classification(
     n_samples=500, n_features=10, n_informative=5,
-    n_redundant=2, random_state=42, flip_y=0.1,
-)
+    n_redundant=2, random_state=42, flip_y=0.1)
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.3, random_state=42
 )
@@ -61,8 +60,7 @@ fig = go.Figure()
 fig.add_trace(go.Scatter(
     x=[0, 1], y=[0, 1], mode="lines",
     line=dict(color=COLORS["gray"], dash="dash", width=1),
-    name="Random", showlegend=True,
-))
+    name="Random", showlegend=True))
 
 # ROC curve
 fig.add_trace(go.Scatter(
@@ -70,8 +68,7 @@ fig.add_trace(go.Scatter(
     line=dict(color=COLORS["primary"], width=3),
     name=f"ROC (AUC={auc_val:.3f})",
     fill="tozeroy",
-    fillcolor="rgba(19,87,201,0.08)",
-))
+    fillcolor="rgba(19,87,201,0.08)"))
 
 # Moving dot — initial position (threshold index 25 = midpoint)
 init_idx = 25
@@ -80,8 +77,7 @@ fig.add_trace(go.Scatter(
     mode="markers",
     marker=dict(color=COLORS["negative"], size=14,
                 line=dict(width=2, color="white")),
-    name="Operating Point",
-))
+    name="Operating Point"))
 
 # ── Slider steps ────────────────────────────────────────────────
 steps = []
@@ -108,21 +104,10 @@ for k in range(len(thresholds)):
                     bgcolor="rgba(255,255,255,0.9)",
                     bordercolor=COLORS["gray"],
                     borderwidth=1,
-                    borderpad=8,
-                ),
-                dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-                     text="<span style='color:#1357c9'><b>Blue</b></span> = ROC curve (AUC shaded) | "
-                          "<span style='color:#ef4444'><b>Red dot</b></span> = current operating point | "
-                          "Dashed = random classifier",
-                     showarrow=False, font=dict(size=12)),
-                dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-                     text="Drag threshold slider: moving dot right trades recall for precision. "
-                          "Curve bowing toward top-left = better model.",
-                     showarrow=False, font=dict(size=11, color="#6b7280")),
+                    borderpad=8),
             ]}
         ],
-        label=f"{thresholds[k]:.2f}",
-    ))
+        label=f"{thresholds[k]:.2f}"))
 
 fig.update_layout(
     title=dict(text=(
@@ -148,25 +133,13 @@ fig.update_layout(
             bgcolor="rgba(255,255,255,0.9)",
             bordercolor=COLORS["gray"],
             borderwidth=1,
-            borderpad=8,
-        ),
-        dict(x=0.5, y=-0.15, xref="paper", yref="paper",
-             text="<span style='color:#1357c9'><b>Blue</b></span> = ROC curve (AUC shaded) | "
-                  "<span style='color:#ef4444'><b>Red dot</b></span> = current operating point | "
-                  "Dashed = random classifier",
-             showarrow=False, font=dict(size=12)),
-        dict(x=0.5, y=-0.22, xref="paper", yref="paper",
-             text="Drag threshold slider: moving dot right trades recall for precision. "
-                  "Curve bowing toward top-left = better model.",
-             showarrow=False, font=dict(size=11, color="#6b7280")),
+            borderpad=8),
     ],
     sliders=[dict(
         active=init_idx,
         currentvalue=dict(prefix="Threshold: "),
         pad=dict(t=60),
-        steps=steps,
-    )],
-)
+        steps=steps)])
 
 # ── Main ────────────────────────────────────────────────────────
 if __name__ == "__main__":
