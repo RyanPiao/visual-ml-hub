@@ -175,23 +175,7 @@ layout.update(
         bgcolor="white",
         font=dict(size=11),
         pad=dict(t=10))],
-    annotations=[
-        dict(
-            text="<b>Curved surface</b> = multiplicative interaction &nbsp;|&nbsp; "
-                 "<b>Flat plane</b> = purely additive (no interaction) &nbsp;|&nbsp; "
-                 "SHAP method: " + ("TreeExplainer" if HAS_SHAP else "finite-difference approx."),
-            xref="paper", yref="paper",
-            showarrow=False,
-            font=dict(size=12),
-            xanchor="center"),
-        dict(
-            text="Switch feature pairs in dropdown. A curved/twisted surface means the two features "
-                 "interact \u2014 one feature's effect depends on the other.",
-            xref="paper", yref="paper",
-            showarrow=False,
-            font=dict(size=11, color="#6b7280"),
-            xanchor="center"),
-    ])
+)
 
 fig.update_layout(layout)
 

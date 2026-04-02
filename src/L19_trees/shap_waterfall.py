@@ -70,12 +70,13 @@ def build_obs_data(obs_idx):
     """Prepare sorted SHAP data for one observation."""
     sv = shap_matrix[obs_idx]
     si = np.argsort(np.abs(sv))  # ascending by magnitude
-    features = [feature_names[int(i)] for i in si]
     shap_sorted = sv[si]
     raw_sorted = X[obs_idx, si]
+    features = [f"{feature_names[int(si[k])]} = {raw_sorted[k]:,.0f}" if raw_sorted[k] > 100
+                else f"{feature_names[int(si[k])]} = {raw_sorted[k]:.2f}"
+                for k in range(len(si))]
     colors = [COLORS["negative"] if v > 0 else COLORS["secondary"] for v in shap_sorted]
-    labels = [f"  {v:+.3f}  ({feature_names[int(si[k])]} = {raw_sorted[k]:,.1f})"
-              for k, v in enumerate(shap_sorted)]
+    labels = [f" {v:+.3f} " for v in shap_sorted]
     output = base_value + sv.sum()
     pred = "Default" if clf.predict(X[obs_idx:obs_idx + 1])[0] == 1 else "No Default"
     return features, shap_sorted, colors, labels, output, pred
@@ -95,7 +96,7 @@ fig.add_trace(go.Bar(
     text=labels_0,
     textposition="outside",
     textfont=dict(size=11),
-    hovertemplate="%{y}: SHAP = %{x:.4f}<extra></extra>",
+    hovertemplate="%{y}<br>SHAP = %{x:.4f}<extra></extra>",
     showlegend=False,
     name="SHAP Values",
 ))
