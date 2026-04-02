@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual ML Hub — Econ 5200/3916</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f9f9f9; color: #1a1c1c; }
+        .header { background: linear-gradient(135deg, #1a1c1c 0%, #2d2d2d 100%); color: white; padding: 2.5rem 1.5rem; text-align: center; }
+        .header h1 { font-size: 2rem; margin-bottom: 0.3rem; }
+        .header p { color: #aab7b8; font-size: 1rem; max-width: 600px; margin: 0 auto; }
+        .container { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+        .section { margin-bottom: 2rem; }
+        .section-title { font-size: 1.1rem; color: #1357c9; margin-bottom: 0.8rem; padding-bottom: 0.4rem; border-bottom: 2px solid #dbeafe; display: flex; align-items: center; gap: 0.5rem; }
+        .section-title .badge { background: #1357c9; color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+        .card { background: white; border: 1px solid #e2e2e2; border-radius: 8px; padding: 1.2rem; transition: box-shadow 0.2s, transform 0.2s; text-decoration: none; color: inherit; display: block; }
+        .card:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        .card h3 { font-size: 0.95rem; margin-bottom: 0.3rem; color: #1a1c1c; }
+        .card p { color: #444748; font-size: 0.82rem; line-height: 1.45; }
+        .card .meta { margin-top: 0.5rem; display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .tag { font-size: 0.65rem; padding: 2px 7px; border-radius: 3px; font-weight: 600; }
+        .tag-3d { background: #fef3c7; color: #92400e; }
+        .tag-slider { background: #dcfce7; color: #166534; }
+        .tag-dropdown { background: #ede9fe; color: #5b21b6; }
+        .tag-animate { background: #fce7f3; color: #9d174d; }
+        .tag-new { background: #ef4444; color: white; }
+        .footer { text-align: center; color: #747878; font-size: 0.8rem; padding: 2rem; }
+        .footer a { color: #1357c9; }
+        .embed-box { background: #f3f4f6; border: 1px solid #e2e2e2; border-radius: 6px; padding: 1rem; margin-top: 1rem; font-size: 0.8rem; }
+        .embed-box code { background: #e2e2e2; padding: 2px 6px; border-radius: 3px; font-size: 0.75rem; }
+        .intro { font-size: 0.9rem; color: #444748; line-height: 1.6; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Visual ML Hub</h1>
+        <p>Interactive machine learning visualizations for Econ 5200 / 3916</p>
+    </div>
+
+    <div class="container">
+        <p class="intro">
+            Rotate, zoom, hover, and drag sliders to explore ML concepts. Every chart is interactive — no installation needed, just click and play. Built with Plotly.
+        </p>
+
+        <!-- L17 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="badge">L17</span> Classification: Logistic Regression
+            </div>
+            <div class="grid">
+                <a href="logistic_3d_surface.html" class="card">
+                    <h3>3D Logistic Sigmoid Surface</h3>
+                    <p>See the S-shaped probability surface. Slider for regularization C changes steepness: steep = confident, flat = uncertain.</p>
+                    <div class="meta">
+                        <span class="tag tag-3d">3D Surface</span>
+                        <span class="tag tag-slider">C Slider</span>
+                        <span class="tag tag-new">NEW</span>
+                    </div>
+                </a>
+                <a href="logistic_boundary.html" class="card">
+                    <h3>2D Decision Boundary</h3>
+                    <p>Scatter plot with contour overlay. Adjust regularization C to see the boundary smooth out or get wiggly.</p>
+                    <div class="meta">
+                        <span class="tag tag-slider">C Slider</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- L18 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="badge">L18</span> Model Evaluation Metrics
+            </div>
+            <div class="grid">
+                <a href="cost_loss_landscape.html" class="card">
+                    <h3>Cost-Loss Landscape</h3>
+                    <p>3D surface: threshold vs class imbalance vs total cost. Find the optimal threshold as FP/FN cost ratio changes.</p>
+                    <div class="meta">
+                        <span class="tag tag-3d">3D Surface</span>
+                        <span class="tag tag-slider">Cost Ratio Slider</span>
+                        <span class="tag tag-new">NEW</span>
+                    </div>
+                </a>
+                <a href="roc_interactive.html" class="card">
+                    <h3>ROC Curve with Threshold Slider</h3>
+                    <p>Drag the threshold — a dot moves along the ROC curve. See TPR, FPR, precision, accuracy update live.</p>
+                    <div class="meta">
+                        <span class="tag tag-slider">Threshold Slider</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- L19 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="badge">L19</span> Tree-Based Models &amp; Random Forests
+            </div>
+            <div class="grid">
+                <a href="tree_splits_3d.html" class="card">
+                    <h3>Decision Tree: 3D Feature Space Splits</h3>
+                    <p>Drag the depth slider — split planes appear, partitioning 3D space into rectangular regions. See overfitting in action.</p>
+                    <div class="meta">
+                        <span class="tag tag-3d">3D Scatter</span>
+                        <span class="tag tag-slider">Depth Slider</span>
+                    </div>
+                </a>
+                <a href="forest_averaging.html" class="card">
+                    <h3>Random Forest: Variance Reduction Surface</h3>
+                    <p>Gold = truth, blue = forest. Drag B slider from 1 to 100 trees — watch the surface smooth out.</p>
+                    <div class="meta">
+                        <span class="tag tag-3d">3D Surface</span>
+                        <span class="tag tag-slider">B Trees Slider</span>
+                    </div>
+                </a>
+                <a href="shap_interaction_surface.html" class="card">
+                    <h3>SHAP Feature Interaction Surface</h3>
+                    <p>3D surface showing how two features interact. Flat = additive; curved = interaction effect.</p>
+                    <div class="meta">
+                        <span class="tag tag-3d">3D Surface</span>
+                        <span class="tag tag-dropdown">Feature Pair Dropdown</span>
+                        <span class="tag tag-new">NEW</span>
+                    </div>
+                </a>
+                <a href="shap_waterfall.html" class="card">
+                    <h3>SHAP Waterfall: Feature Attribution</h3>
+                    <p>How each feature pushes a prediction toward or away from default. Select different observations.</p>
+                    <div class="meta">
+                        <span class="tag tag-dropdown">Observation Dropdown</span>
+                    </div>
+                </a>
+                <a href="bootstrap_sampling.html" class="card">
+                    <h3>Bootstrap Sampling Animation</h3>
+                    <p>Animated bar chart showing bootstrap resampling. See which points are in-sample vs out-of-bag.</p>
+                    <div class="meta">
+                        <span class="tag tag-animate">Animated</span>
+                    </div>
+                </a>
+                <a href="gradient_boosting.html" class="card">
+                    <h3>Gradient Boosting: Sequential Residuals</h3>
+                    <p>Watch the prediction line converge to truth stage by stage. Adjust learning rate and boosting stage.</p>
+                    <div class="meta">
+                        <span class="tag tag-slider">Stage Slider</span>
+                        <span class="tag tag-dropdown">Learning Rate</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- L20 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="badge">L20</span> Time Series: Decomposition
+            </div>
+            <div class="grid">
+                <a href="decomposition_3d.html" class="card">
+                    <h3>3D Decomposition Stack</h3>
+                    <p>Trend, seasonal, and residual as stacked 3D ribbons. Slider for smoothing window changes the trend.</p>
+                    <div class="meta">
+                        <span class="tag tag-3d">3D Lines</span>
+                        <span class="tag tag-slider">Smoothing Slider</span>
+                        <span class="tag tag-new">NEW</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- L22 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="badge">L22</span> Clustering: Unsupervised Learning
+            </div>
+            <div class="grid">
+                <a href="pca_3d_clusters.html" class="card">
+                    <h3>3D PCA Country Clusters</h3>
+                    <p>80 countries projected onto 3 principal components. Drag K slider to see cluster assignments change.</p>
+                    <div class="meta">
+                        <span class="tag tag-3d">3D Scatter</span>
+                        <span class="tag tag-slider">K Slider</span>
+                        <span class="tag tag-new">NEW</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- L23 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="badge">L23</span> NLP: Text as Data
+            </div>
+            <div class="grid">
+                <a href="embedding_space_3d.html" class="card">
+                    <h3>Document Embedding Space</h3>
+                    <p>FOMC minutes projected to 3D. Hawkish, dovish, neutral, uncertain clusters. Filter by decade.</p>
+                    <div class="meta">
+                        <span class="tag tag-3d">3D Scatter</span>
+                        <span class="tag tag-slider">Decade Filter</span>
+                        <span class="tag tag-dropdown">Color Mode</span>
+                        <span class="tag tag-new">NEW</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- L24 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="badge">L24</span> Causal ML: Double Machine Learning
+            </div>
+            <div class="grid">
+                <a href="cate_surface.html" class="card">
+                    <h3>CATE: Who Benefits Most?</h3>
+                    <p>Heterogeneous treatment effect surface. Income vs age vs estimated treatment effect. Gold = true, blue = estimated.</p>
+                    <div class="meta">
+                        <span class="tag tag-3d">3D Surface</span>
+                        <span class="tag tag-new">NEW</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Canvas embed instructions -->
+        <div class="embed-box">
+            <strong>Canvas LMS Embed:</strong> In any Canvas page, switch to HTML editor and paste:<br>
+            <code>&lt;iframe src="https://RyanPiao.github.io/visual-ml-hub/tree_splits_3d.html" width="100%" height="700" frameborder="0"&gt;&lt;/iframe&gt;</code><br>
+            <span style="color: #747878;">Replace the filename with any chart above.</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Built with Plotly | <a href="https://github.com/RyanPiao/visual-ml-hub">GitHub Repo</a> | Econ 5200 / 3916</p>
+    </div>
+</body>
+</html>
