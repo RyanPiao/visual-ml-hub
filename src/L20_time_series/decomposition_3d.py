@@ -118,16 +118,14 @@ layout = make_3d_layout(
     height=700)
 
 layout.update(
-    showlegend=False,
     title=dict(text=(
-        "<b>Time Series Decomposition</b> · "
-        "<span style='color:#1a1c1c'>━</span> Original · "
-        "<span style='color:#3b82f6'>━</span> Trend · "
-        "<span style='color:#f97316'>━</span> Seasonal · "
-        "<span style='color:#6b7280'>━</span> Residual"
-    ), font=dict(size=12), x=0.5, xanchor="center"),
+        "<b>Time Series Decomposition: Trend + Seasonal + Residual</b><br>"
+        "<span style='font-size:12px; color:#6b7280'>Original = Trend + Seasonal + Residual</span>"
+    ), font=dict(size=14), x=0.5, xanchor="center"),
+    legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="center", x=0.5,
+                bgcolor="rgba(255,255,255,0)", font=dict(size=11)),
     autosize=True,
-    margin=dict(l=0, r=0, t=30, b=60),
+    margin=dict(l=0, r=0, t=55, b=60),
         sliders=[dict(
         active=0,
         currentvalue=dict(prefix="Smoothing window: ", suffix=" months"),
