@@ -115,7 +115,6 @@ layout = make_3d_layout(
     x_title="Month",
     y_title="Component",
     z_title="Value",
-    width=900,
     height=700)
 
 layout.update(
@@ -123,7 +122,8 @@ layout.update(
         "<b>Time Series Decomposition: Trend + Seasonal + Residual</b><br>"
         "<span style='font-size:13px; color:#6b7280'>Original = Trend + Seasonal + Residual</span>"
     ), font=dict(size=16), x=0.5, xanchor="center"),
-    margin=dict(l=20, r=20, t=60, b=80),
+    autosize=True,
+    margin=dict(l=0, r=0, t=60, b=80),
         sliders=[dict(
         active=0,
         currentvalue=dict(prefix="Smoothing window: ", suffix=" months"),
@@ -137,7 +137,7 @@ layout.update(
             backgroundcolor=COLORS["surface_bg"],
             gridcolor="#e2e2e2",
             showbackground=True),
-        camera=dict(eye=dict(x=1.8, y=-1.4, z=0.9))))
+        camera=dict(eye=dict(x=2.0, y=-1.0, z=0.8))))
 
 fig.update_layout(layout)
 
@@ -146,5 +146,5 @@ if __name__ == "__main__":
     fig.show()
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                        "decomposition_3d.html")
-    fig.write_html(out)
+    fig.write_html(out, include_plotlyjs="cdn")
     print(f"Saved → {out}")
