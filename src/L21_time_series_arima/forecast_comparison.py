@@ -115,18 +115,16 @@ TRACES_PER_FOLD = 5
 for fi, fold in enumerate(folds):
     vis = (fi == 0)
 
-    # (1) Training region — light shaded area
+    # (1) Training region — line plot of training data
     fig.add_trace(go.Scatter(
-        x=list(fold["train_dates"]) + list(fold["train_dates"][::-1]),
-        y=list(fold["train_vals"]) + [0] * len(fold["train_vals"]),
-        fill="toself",
-        fillcolor="rgba(147, 197, 253, 0.15)",
-        line=dict(width=0),
+        x=list(fold["train_dates"]),
+        y=list(fold["train_vals"]),
         mode="lines",
+        line=dict(color=COLORS["light_blue"], width=1.5),
         name="Training data",
         visible=vis,
         showlegend=True,
-        hoverinfo="skip",
+        hovertemplate="%{x|%b %Y}<br>Train = %{y:.1f}<extra></extra>",
     ))
 
     # (2) Actual test values
