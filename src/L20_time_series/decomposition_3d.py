@@ -121,9 +121,11 @@ layout.update(
     title=dict(text=(
         "<b>Time Series Decomposition: Trend + Seasonal + Residual</b><br>"
         "<span style='font-size:13px; color:#6b7280'>Original = Trend + Seasonal + Residual</span>"
-    ), font=dict(size=16), x=0.5, xanchor="center"),
+    ), font=dict(size=16), x=0.5, xanchor="center", y=0.98, yanchor="top"),
+    legend=dict(orientation="h", yanchor="top", y=0.95, xanchor="center", x=0.5,
+                bgcolor="rgba(255,255,255,0.8)"),
     autosize=True,
-    margin=dict(l=0, r=0, t=60, b=80),
+    margin=dict(l=0, r=0, t=80, b=80),
         sliders=[dict(
         active=0,
         currentvalue=dict(prefix="Smoothing window: ", suffix=" months"),
