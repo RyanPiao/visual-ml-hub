@@ -124,23 +124,32 @@ function resetRun(keepSeed){
   draw();
 }
 
-// one random axis-aligned cut inside the current box, through the target's side
+// One random axis-aligned cut. The split is drawn from the range of the houses
+// STILL IN THE BOX, not from the box itself -- otherwise cuts land in empty space
+// (bed < 0.5, when the smallest house has 1 bedroom) and separate nothing. This is
+// what a real isolation tree does, and it means every cut you watch does some work.
+const boxOf = ps => ({
+  x0: Math.min(...ps.map(p => p.x)), x1: Math.max(...ps.map(p => p.x)),
+  y0: Math.min(...ps.map(p => p.y)), y1: Math.max(...ps.map(p => p.y))
+});
+const within = b => PTS.filter(p => p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1);
+
 function oneCut(){
   if (finished) return false;
-  const w = box.x1 - box.x0, h = box.y1 - box.y0;
-  const useX = rnd() < w / (w + h);                 // pick a feature, area-weighted
+  const inside = within(box);
+  if (inside.length <= 1){ finished = true; return false; }
+  const sp = boxOf(inside), w = sp.x1 - sp.x0, h = sp.y1 - sp.y0;
+  const useX = (w > 0 && h > 0) ? rnd() < .5 : w > 0;   // pick a feature at random
   if (useX){
-    const c = box.x0 + rnd() * w;
+    const c = sp.x0 + rnd() * w;
     cuts.push({ axis: 'x', at: c, box: { ...box } });
     if (target.x < c) box.x1 = c; else box.x0 = c;
   } else {
-    const c = box.y0 + rnd() * h;
+    const c = sp.y0 + rnd() * h;
     cuts.push({ axis: 'y', at: c, box: { ...box } });
     if (target.y < c) box.y1 = c; else box.y0 = c;
   }
-  // isolated when no other point shares the box
-  const inside = PTS.filter(p => p.x >= box.x0 && p.x <= box.x1 && p.y >= box.y0 && p.y <= box.y1);
-  if (inside.length <= 1) finished = true;
+  if (within(box).length <= 1) finished = true;
   return true;
 }
 
@@ -149,17 +158,17 @@ function pathLength(t){
   const save = [cuts, box, finished, target];
   let b = { x0: XR[0], x1: XR[1], y0: YR[0], y1: YR[1] }, n = 0;
   for (let guard = 0; guard < 60; guard++){
-    const w = b.x1 - b.x0, h = b.y1 - b.y0;
-    if (rnd() < w / (w + h)){
-      const c = b.x0 + rnd() * w;
+    const inside = within(b);
+    if (inside.length <= 1) break;
+    const sp = boxOf(inside), w = sp.x1 - sp.x0, h = sp.y1 - sp.y0;
+    if ((w > 0 && h > 0) ? rnd() < .5 : w > 0){
+      const c = sp.x0 + rnd() * w;
       if (t.x < c) b.x1 = c; else b.x0 = c;
     } else {
-      const c = b.y0 + rnd() * h;
+      const c = sp.y0 + rnd() * h;
       if (t.y < c) b.y1 = c; else b.y0 = c;
     }
     n++;
-    const inside = PTS.filter(p => p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1);
-    if (inside.length <= 1) break;
   }
   [cuts, box, finished, target] = save;
   return n;
