@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isolation Forest, Step by Step</title>
+<style>
+  :root{
+    --primary:#1357c9; --pos:#10b981; --neg:#ef4444; --sec:#3b82f6;
+    --hl:#f97316; --gold:#eab308; --gray:#6b7280; --bg:#f9f9f9;
+    --text:#1a1c1c; --line:#e3e3e0; --card:#fff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 16px 30px}
+  h1{font-size:1.3rem;margin:0 0 2px}
+  .sub{color:var(--gray);font-size:.88rem;margin:0 0 14px}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+  button{font:inherit;font-size:.85rem;padding:8px 14px;border-radius:8px;
+    border:1.5px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+  button:hover{border-color:var(--primary)}
+  button.pri{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}
+  button.on{border-color:var(--primary);background:#eef4ff;color:var(--primary);font-weight:600}
+  button:disabled{opacity:.4;cursor:default}
+  .grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:14px}
+  .card h2{font-size:.76rem;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--gray);margin:0 0 9px;font-weight:700}
+  svg{display:block;width:100%;height:auto}
+  .say{background:#f3f6fd;border-left:4px solid var(--sec);border-radius:0 8px 8px 0;
+    padding:11px 15px;margin-top:12px;font-size:.93rem;min-height:3.2em}
+  .big{font-size:1.9rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .cmp div{border-radius:9px;padding:11px 13px}
+  .foot{margin-top:16px;font-size:.8rem;color:var(--gray);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Isolation Forest, step by step</h1>
+  <p class="sub">The question is not &ldquo;is this value extreme?&rdquo;&nbsp; It is <b>how few random cuts does it take to fence this point off on its own?</b></p>
+
+  <div class="bar">
+    <button id="pickOut" class="on">Isolate the odd house</button>
+    <button id="pickTyp">Isolate a normal house</button>
+    <span style="width:14px"></span>
+    <button id="step" class="pri">Cut once</button>
+    <button id="finish">Finish this tree</button>
+    <button id="hundred">Run 100 trees</button>
+    <button id="reset">Reset</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>The data — 2 features, 60 houses</h2>
+      <svg id="plot" viewBox="0 0 560 420" role="img" aria-label="Scatter of houses with random axis-aligned cuts"></svg>
+      <div class="say" id="say"></div>
+    </div>
+
+    <div class="card">
+      <h2>The tree you are building</h2>
+      <svg id="treeSvg" viewBox="0 0 380 300" role="img" aria-label="The sequence of random splits as a tree"></svg>
+      <div style="margin-top:10px">
+        <span class="big" id="depth" style="color:var(--primary)">0</span>
+        <span style="color:var(--gray);font-size:.9rem"> cuts so far</span>
+      </div>
+      <div class="cmp">
+        <div style="background:#FBF1EC">
+          <div style="font-size:.76rem;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;font-weight:700">Odd house</div>
+          <div class="big" style="font-size:1.45rem;color:var(--neg)" id="avgOut">&mdash;</div>
+          <div style="font-size:.78rem;color:var(--gray)">mean cuts over 100 trees</div>
+        </div>
+        <div style="background:#EFF4EF">
+          <div style="font-size:.76rem;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;font-weight:700">Normal house</div>
+          <div class="big" style="font-size:1.45rem;color:var(--pos)" id="avgTyp">&mdash;</div>
+          <div style="font-size:.78rem;color:var(--gray)">mean cuts over 100 trees</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">
+    <b>Why this is different from a fence.</b> Tukey asks one variable at a time, so it only ever sees a point that is
+    extreme <i>on an axis</i>. Here the odd house is <b>not</b> extreme in bedrooms and <b>not</b> extreme in rooms &mdash;
+    it is strange only as a <i>combination</i>, and the cuts find it anyway.
+    <br>Built for ECON 3916 / 5200 Topic 4. Seeded, so the same button gives the same picture twice.
+  </p>
+</div>
+
+<script>
+// ---- deterministic RNG so a demo repeats -----------------------------------
+let seed = 7;
+function rnd(){ seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
+function reseed(s){ seed = s; }
+
+// ---- the data: bedrooms (x) vs total rooms (y) -----------------------------
+// normal houses sit on a band (rooms grows with bedrooms). The odd one has few
+// bedrooms and many rooms: ordinary on each axis, absurd as a pair.
+const PTS = [];
+reseed(11);
+for (let i = 0; i < 59; i++){
+  const bed = 1 + rnd() * 5;                       // 1..6 bedrooms
+  const rooms = bed * 1.6 + 1.2 + (rnd() - .5) * 1.1;
+  PTS.push({ x: bed, y: rooms, odd: false });
+}
+const ODD = { x: 2.0, y: 10.0, odd: true };        // 2 bedrooms, 10 rooms
+PTS.push(ODD);
+const TYP = PTS[17];                                // a point inside the crowd
+
+const XR = [0.5, 6.5], YR = [1, 11];
+let target = ODD, cuts = [], box = null, finished = false;
+
+const $ = id => document.getElementById(id);
+const PW = 560, PH = 420, M = { l: 46, r: 14, t: 12, b: 38 };
+const sx = v => M.l + (v - XR[0]) / (XR[1] - XR[0]) * (PW - M.l - M.r);
+const sy = v => PH - M.b - (v - YR[0]) / (YR[1] - YR[0]) * (PH - M.t - M.b);
+
+function resetRun(keepSeed){
+  if (!keepSeed) reseed(Math.floor(Math.random() * 1e6));
+  cuts = []; finished = false;
+  box = { x0: XR[0], x1: XR[1], y0: YR[0], y1: YR[1] };
+  draw();
+}
+
+// one random axis-aligned cut inside the current box, through the target's side
+function oneCut(){
+  if (finished) return false;
+  const w = box.x1 - box.x0, h = box.y1 - box.y0;
+  const useX = rnd() < w / (w + h);                 // pick a feature, area-weighted
+  if (useX){
+    const c = box.x0 + rnd() * w;
+    cuts.push({ axis: 'x', at: c, box: { ...box } });
+    if (target.x < c) box.x1 = c; else box.x0 = c;
+  } else {
+    const c = box.y0 + rnd() * h;
+    cuts.push({ axis: 'y', at: c, box: { ...box } });
+    if (target.y < c) box.y1 = c; else box.y0 = c;
+  }
+  // isolated when no other point shares the box
+  const inside = PTS.filter(p => p.x >= box.x0 && p.x <= box.x1 && p.y >= box.y0 && p.y <= box.y1);
+  if (inside.length <= 1) finished = true;
+  return true;
+}
+
+// a whole tree, silently — returns the number of cuts
+function pathLength(t){
+  const save = [cuts, box, finished, target];
+  let b = { x0: XR[0], x1: XR[1], y0: YR[0], y1: YR[1] }, n = 0;
+  for (let guard = 0; guard < 60; guard++){
+    const w = b.x1 - b.x0, h = b.y1 - b.y0;
+    if (rnd() < w / (w + h)){
+      const c = b.x0 + rnd() * w;
+      if (t.x < c) b.x1 = c; else b.x0 = c;
+    } else {
+      const c = b.y0 + rnd() * h;
+      if (t.y < c) b.y1 = c; else b.y0 = c;
+    }
+    n++;
+    const inside = PTS.filter(p => p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1);
+    if (inside.length <= 1) break;
+  }
+  [cuts, box, finished, target] = save;
+  return n;
+}
+
+function draw(){
+  // ---------- scatter ----------
+  let o = '';
+  o += `<rect x="${M.l}" y="${M.t}" width="${PW-M.l-M.r}" height="${PH-M.t-M.b}" fill="#fff" stroke="var(--line)"/>`;
+  // the surviving box
+  o += `<rect x="${sx(box.x0)}" y="${sy(box.y1)}" width="${sx(box.x1)-sx(box.x0)}" `
+     + `height="${sy(box.y0)-sy(box.y1)}" fill="var(--sec)" opacity=".10"/>`;
+  // cuts
+  cuts.forEach((c, i) => {
+    const last = i === cuts.length - 1;
+    const col = last ? 'var(--hl)' : 'var(--gray)';
+    const wd = last ? 2.4 : 1.1, op = last ? 1 : .45;
+    if (c.axis === 'x')
+      o += `<line x1="${sx(c.at)}" y1="${sy(c.box.y1)}" x2="${sx(c.at)}" y2="${sy(c.box.y0)}" stroke="${col}" stroke-width="${wd}" opacity="${op}"/>`;
+    else
+      o += `<line x1="${sx(c.box.x0)}" y1="${sy(c.at)}" x2="${sx(c.box.x1)}" y2="${sy(c.at)}" stroke="${col}" stroke-width="${wd}" opacity="${op}"/>`;
+  });
+  // points
+  PTS.forEach(p => {
+    const isT = p === target;
+    const r = p.odd ? 6.5 : (isT ? 6.5 : 3.6);
+    const fill = p.odd ? 'var(--neg)' : (isT ? 'var(--pos)' : 'var(--gray)');
+    o += `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="${r}" fill="${fill}" opacity="${p.odd||isT?1:.5}"/>`;
+    if (isT) o += `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="${r+4.5}" fill="none" stroke="${fill}" stroke-width="2"/>`;
+  });
+  // axes
+  o += `<text x="${(PW+M.l)/2}" y="${PH-8}" text-anchor="middle" font-size="13" fill="var(--gray)">bedrooms</text>`;
+  o += `<text x="14" y="${(PH-M.b+M.t)/2}" text-anchor="middle" font-size="13" fill="var(--gray)" transform="rotate(-90 14 ${(PH-M.b+M.t)/2})">total rooms</text>`;
+  $('plot').innerHTML = o;
+
+  // ---------- the tree ----------
+  let t = '', x = 190, y = 22, dx = 78;
+  t += `<circle cx="${x}" cy="${y}" r="9" fill="var(--primary)"/>`;
+  cuts.slice(0, 7).forEach((c, i) => {
+    const ny = y + 36, nx = x + (i % 2 ? -dx : dx) * Math.pow(.62, i);
+    t += `<line x1="${x}" y1="${y+9}" x2="${nx}" y2="${ny-9}" stroke="var(--gray)" stroke-width="1.4"/>`;
+    t += `<text x="${(x+nx)/2 + 6}" y="${(y+ny)/2}" font-size="11" fill="var(--gray)">${c.axis === 'x' ? 'bed' : 'rooms'} &lt; ${c.at.toFixed(1)}</text>`;
+    const leaf = i === cuts.length - 1 && finished;
+    t += `<circle cx="${nx}" cy="${ny}" r="${leaf?10:8}" fill="${leaf ? (target.odd?'var(--neg)':'var(--pos)') : 'var(--primary)'}"/>`;
+    x = nx; y = ny;
+  });
+  if (cuts.length > 7)
+    t += `<text x="190" y="290" text-anchor="middle" font-size="12" fill="var(--gray)">… ${cuts.length-7} more cuts</text>`;
+  $('treeSvg').setAttribute('viewBox', `0 0 380 ${Math.max(300, y + 40)}`);
+  $('treeSvg').innerHTML = t;
+
+  $('depth').textContent = cuts.length;
+  $('say').innerHTML = finished
+    ? `<b>Isolated in ${cuts.length} cut${cuts.length===1?'':'s'}.</b> ` +
+      (target.odd
+        ? 'Few cuts — that is what makes it an outlier. Notice it is not extreme in bedrooms <i>or</i> in rooms; it is the <b>pair</b> that is strange, and a one-variable fence would never have flagged it.'
+        : 'Many cuts, because it sits in the crowd. Every neighbour has to be sliced away first.')
+    : cuts.length === 0
+      ? 'Press <b>Cut once</b>. Each cut picks a feature at random and a split point at random — nothing is aimed at the target.'
+      : `Cut ${cuts.length}: the box around the target shrank. Still sharing it with other houses, so keep going.`;
+}
+
+function runHundred(){
+  let so = 0, st = 0;
+  for (let i = 0; i < 100; i++){ so += pathLength(ODD); st += pathLength(TYP); }
+  $('avgOut').textContent = (so/100).toFixed(1);
+  $('avgTyp').textContent = (st/100).toFixed(1);
+}
+
+$('step').onclick   = () => { oneCut(); draw(); };
+$('finish').onclick = () => { let g = 0; while (!finished && g++ < 60) oneCut(); draw(); };
+$('reset').onclick  = () => resetRun(false);
+$('hundred').onclick = runHundred;
+$('pickOut').onclick = () => {
+  target = ODD; $('pickOut').classList.add('on'); $('pickTyp').classList.remove('on'); resetRun(false);
+};
+$('pickTyp').onclick = () => {
+  target = TYP; $('pickTyp').classList.add('on'); $('pickOut').classList.remove('on'); resetRun(false);
+};
+resetRun(true);
+</script>
+</body>
+</html>
