@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bayes — Changing Beliefs</title>
+<style>
+  :root{
+    --primary:#1357c9; --pos:#10b981; --neg:#ef4444; --sec:#3b82f6;
+    --hl:#f97316; --gold:#eab308; --gray:#6b7280; --lblue:#93c5fd;
+    --bg:#f9f9f9; --text:#1a1c1c; --line:#e3e3e0; --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  .wrap{max-width:1160px;margin:0 auto;padding:18px 16px 28px}
+  h1{font-size:1.32rem;margin:0 0 2px;letter-spacing:-.01em}
+  .sub{color:var(--gray);font-size:.87rem;margin:0 0 14px}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+  .presets button{font:inherit;font-size:.83rem;padding:7px 13px;border-radius:999px;
+    border:1.5px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+  .presets button.on{border-color:var(--primary);background:#eef4ff;color:var(--primary);font-weight:600}
+  .story{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--primary);
+    border-radius:9px;padding:12px 15px;margin:0 0 16px;font-size:.95rem}
+  .story b{color:var(--primary)}
+  .grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:14px 15px}
+  .card h2{font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--gray);margin:0 0 10px;font-weight:700}
+  .ctrl{margin:0 0 13px}
+  .ctrl label{display:flex;justify-content:space-between;align-items:baseline;
+    font-size:.87rem;margin-bottom:3px;gap:10px}
+  .ctrl .val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--primary)}
+  .ctrl .note{display:block;color:var(--gray);font-size:.76rem;margin-top:2px}
+  input[type=range]{width:100%;accent-color:var(--primary);margin:0}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  .answer{background:var(--card);border:1px solid var(--line);border-radius:11px;
+    padding:15px;margin-top:16px}
+  .big{font-size:2.5rem;font-weight:800;color:var(--primary);
+       font-variant-numeric:tabular-nums;line-height:1.05}
+  .big small{font-size:.95rem;font-weight:600;color:var(--gray);display:block;margin-top:2px}
+  .frac{font-size:.95rem;color:var(--gray);margin-top:9px;font-variant-numeric:tabular-nums}
+  .frac b{color:var(--text)}
+  .movement{margin-top:11px;font-size:.88rem;padding:9px 12px;border-radius:7px;
+    background:#f3f6fd;border-left:3px solid var(--sec)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.79rem;color:var(--gray);margin-top:8px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+  .foot{margin-top:18px;font-size:.79rem;color:var(--gray);line-height:1.6}
+  .foot code{background:#eee;padding:1px 5px;border-radius:4px;font-size:.95em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bayes' theorem — the geometry of changing beliefs</h1>
+  <p class="sub">Evidence does not <em>determine</em> what you believe. It <em>updates</em> what you already believed. Drag anything.</p>
+
+  <div class="presets">
+    <button id="p-husky" class="on">Husky warm-up</button>
+    <button id="p-fraud">The card issuer (G 19)</button>
+    <button id="p-irrelevant">Useless evidence</button>
+  </div>
+
+  <div class="story" id="story"></div>
+
+  <div class="grid">
+    <div class="card">
+      <h2 id="gridTitle">A representative sample</h2>
+      <svg id="people" viewBox="0 0 560 300" role="img" aria-label="Representative sample grid"></svg>
+      <div class="legend">
+        <span><i style="background:var(--gold)"></i><span id="lg-h">hypothesis</span></span>
+        <span><i style="background:var(--pos)"></i><span id="lg-nh">everyone else</span></span>
+        <span><i style="background:var(--sec)"></i>fits the evidence</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>The same thing, as area</h2>
+      <svg id="area" viewBox="0 0 400 300" role="img" aria-label="Unit square area diagram"></svg>
+      <div class="legend">
+        <span>width = prior &nbsp;·&nbsp; height = likelihood &nbsp;·&nbsp; shaded = fits the evidence</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:16px">
+    <div class="card">
+      <h2>Your three numbers</h2>
+      <div class="ctrl">
+        <label><span id="l-prior">Prior</span><span class="val" id="v-prior"></span></label>
+        <input type="range" id="s-prior" min="0.1" max="99" step="0.1">
+        <span class="note" id="n-prior"></span>
+      </div>
+      <div class="ctrl">
+        <label><span id="l-lh">Likelihood if true</span><span class="val" id="v-lh"></span></label>
+        <input type="range" id="s-lh" min="0" max="100" step="1">
+        <span class="note" id="n-lh"></span>
+      </div>
+      <div class="ctrl">
+        <label><span id="l-lnh">Likelihood if false</span><span class="val" id="v-lnh"></span></label>
+        <input type="range" id="s-lnh" min="0" max="100" step="1">
+        <span class="note" id="n-lnh"></span>
+      </div>
+    </div>
+
+    <div class="answer">
+      <h2 style="font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:var(--gray);margin:0 0 8px;font-weight:700">The posterior</h2>
+      <div class="big"><span id="post"></span><small id="postLabel"></small></div>
+      <div class="frac" id="frac"></div>
+      <div class="movement" id="move"></div>
+    </div>
+  </div>
+
+  <p class="foot">
+    <b>The mantra:</b> new evidence does not determine your beliefs in a vacuum — it updates prior beliefs.
+    Set the two likelihoods equal and watch the posterior snap back to the prior: irrelevant evidence changes nothing.
+    <br>Built for ECON 3916 / 5200 Topic 5. The geometry follows 3Blue1Brown, <i>Bayes theorem, the geometry of changing beliefs</i>.
+  </p>
+</div>
+
+<script>
+const PRESETS = {
+  husky: {
+    prior: 5, lh: 40, lnh: 10, n: 210,
+    story: `<b>Riley</b> is quiet and hyper-organised, colour-codes every set of notes, and would rather clean a messy dataset all afternoon than run a meeting.<br>
+            Is Riley more likely to be a <b>data-science major</b> — or a <b>business major</b>?<br>
+            <span style="color:var(--gray);font-size:.88rem">Almost everyone answers from the description alone. The description is only half the problem: the other half is how many of each there are to begin with.</span>`,
+    hName: "data-science major", nhName: "business major",
+    gridTitle: "210 Huskies, a representative sample",
+    lPrior: "How many of the 210 are data-science majors",
+    nPrior: "Your estimate — roughly 1 in 20 to start. This is the number nobody thinks to ask for, the one that moves the answer most, and the one worth arguing about: who is Riley, exactly? A random Husky? Someone in this room?",
+    lLh: "Share of data-science majors fitting the description",
+    nLh: "Your gut instinct. You are not expected to know this exactly.",
+    lLnh: "Share of business majors fitting the description",
+    nLnh: "Lower, presumably — but there are a lot more of them.",
+    postLabel: "chance Riley is a data-science major, given the description"
+  },
+  fraud: {
+    prior: 0.1, lh: 99, lnh: 2, n: 1000,
+    story: `You are on co-op at a card issuer. The model flags a transaction as fraud.<br>
+            It catches <b>99%</b> of real fraud and falsely flags <b>2%</b> of legitimate transactions. Fraud runs at <b>0.1%</b> of all swipes.<br>
+            <span style="color:var(--gray);font-size:.88rem">Before you touch the sliders: write down what you think the answer is. Most people say about 99%.</span>`,
+    hName: "actually fraud", nhName: "legitimate",
+    gridTitle: "1,000 transactions (one row = 100)",
+    lPrior: "Base rate — share of swipes that are really fraud",
+    nPrior: "The whole hour turns on this number being small.",
+    lLh: "Sensitivity — share of real fraud the model catches",
+    nLh: "The number that makes the model sound excellent.",
+    lLnh: "False positive rate — share of good swipes it flags",
+    nLnh: "Small, but it applies to almost everybody.",
+    postLabel: "chance a flagged transaction is really fraud — the precision"
+  },
+  irrelevant: {
+    prior: 30, lh: 45, lnh: 45, n: 210,
+    story: `Both likelihoods are <b>equal</b>: the evidence is exactly as common among the hypothesis as outside it.<br>
+            <span style="color:var(--gray);font-size:.88rem">Watch the posterior. Drag either likelihood and it moves; keep them equal and nothing happens, however dramatic the evidence sounds.</span>`,
+    hName: "hypothesis true", nhName: "hypothesis false",
+    gridTitle: "210 cases",
+    lPrior: "Prior — P(H)",
+    nPrior: "Where you started.",
+    lLh: "P(E | H)",
+    nLh: "How often you would see this evidence if H were true.",
+    lLnh: "P(E | not H)",
+    nLnh: "How often you would see it anyway.",
+    postLabel: "posterior — P(H | E)"
+  }
+};
+
+let cur = "husky";
+const $ = id => document.getElementById(id);
+const sPrior = $("s-prior"), sLh = $("s-lh"), sLnh = $("s-lnh");
+
+function fmtPct(x){ return (x >= 10 ? x.toFixed(1) : x.toFixed(2)).replace(/\.0+$/,"") + "%"; }
+
+function apply(name){
+  cur = name;
+  const p = PRESETS[name];
+  sPrior.value = p.prior; sLh.value = p.lh; sLnh.value = p.lnh;
+  $("story").innerHTML = p.story;
+  $("gridTitle").textContent = p.gridTitle;
+  $("l-prior").textContent = p.lPrior; $("n-prior").textContent = p.nPrior;
+  $("l-lh").textContent = p.lLh;       $("n-lh").textContent = p.nLh;
+  $("l-lnh").textContent = p.lLnh;     $("n-lnh").textContent = p.nLnh;
+  $("postLabel").textContent = p.postLabel;
+  $("lg-h").textContent = p.hName; $("lg-nh").textContent = p.nhName;
+  ["p-husky","p-fraud","p-irrelevant"].forEach(b => $(b).classList.remove("on"));
+  $("p-" + name).classList.add("on");
+  draw();
+}
+
+function draw(){
+  const p = PRESETS[cur];
+  const prior = +sPrior.value / 100, lh = +sLh.value / 100, lnh = +sLnh.value / 100;
+  $("v-prior").textContent = fmtPct(+sPrior.value);
+  $("v-lh").textContent    = fmtPct(+sLh.value);
+  $("v-lnh").textContent   = fmtPct(+sLnh.value);
+
+  const num = prior * lh, den = num + (1 - prior) * lnh;
+  const post = den > 0 ? num / den : 0;
+
+  $("post").textContent = fmtPct(post * 100);
+
+  // ---- representative sample counts -------------------------------------
+  const N = p.n;
+  const nH = prior * N, nHE = nH * lh, nNHE = (N - nH) * lnh;
+  const r = x => x >= 100 ? Math.round(x).toLocaleString() : (x >= 10 ? x.toFixed(0) : x.toFixed(1));
+  $("frac").innerHTML =
+    `out of ${r(N)}: <b>${r(nHE)}</b> ${p.hName} fit the evidence, ` +
+    `<b>${r(nNHE)}</b> ${p.nhName} also fit it.<br>` +
+    `posterior = ${r(nHE)} &divide; (${r(nHE)} + ${r(nNHE)}) = <b>${fmtPct(post*100)}</b>`;
+
+  const delta = post - prior;
+  const mv = $("move");
+  if (Math.abs(delta) < 0.0005){
+    mv.style.borderLeftColor = "var(--gray)";
+    mv.innerHTML = `The evidence moved your belief by <b>nothing at all</b>. Both likelihoods are equal, so it was never evidence about this question.`;
+  } else {
+    const up = delta > 0;
+    mv.style.borderLeftColor = up ? "var(--pos)" : "var(--neg)";
+    const factor = prior > 0 ? post / prior : 0;
+    mv.innerHTML = `Belief moved from <b>${fmtPct(prior*100)}</b> to <b>${fmtPct(post*100)}</b> — ` +
+      `${up ? "up" : "down"} by ${fmtPct(Math.abs(delta)*100)}` +
+      (up && factor > 1.05 ? `, a factor of <b>${factor.toFixed(1)}&times;</b>` : "") + `.`;
+  }
+
+  drawPeople(prior, lh, lnh, N);
+  drawArea(prior, lh, lnh, post);
+}
+
+// ---------- panel 1: representative sample ---------------------------------
+function drawPeople(prior, lh, lnh, N){
+  const svg = $("people"); const p = PRESETS[cur];
+  // COLUMN-MAJOR, like the video: the hypothesis fills the leftmost columns, so the
+  // prior is a visible slab of width rather than a scattering you have to count.
+  const ROWS = N > 500 ? 20 : 10;
+  const COLS = Math.ceil(N / ROWS);
+  const W = 560, cell = W / COLS, R = Math.min(cell * 0.32, 8);
+  const TOP = 16, H = TOP + ROWS * cell + 20;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+
+  const nH = Math.round(prior * N);
+  const nHE = Math.round(nH * lh), nNHE = Math.round((N - nH) * lnh);
+  let out = "", iH = 0, iN = 0;
+  for (let i = 0; i < N; i++){
+    const c = (i / ROWS) | 0, rw = i % ROWS;             // column-major
+    const cx = c * cell + cell / 2, cy = TOP + rw * cell + cell / 2;
+    const isH = i < nH;
+    let fill, op;
+    if (isH){ iH++; const fits = iH <= nHE;
+      fill = fits ? "var(--sec)" : "var(--gold)"; op = fits ? 1 : .45; }
+    else { iN++; const fits = iN <= nNHE;
+      fill = fits ? "var(--sec)" : "var(--pos)"; op = fits ? 1 : .28; }
+    out += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${R.toFixed(1)}" fill="${fill}" opacity="${op}"/>`;
+  }
+  // bracket + count over the hypothesis slab
+  const hw = Math.max((nH / ROWS) * cell, cell * 0.5);
+  out += `<line x1="1" y1="9" x2="${hw.toFixed(1)}" y2="9" stroke="var(--gold)" stroke-width="2.5"/>`;
+  out += `<line x1="1" y1="6" x2="1" y2="12" stroke="var(--gold)" stroke-width="2.5"/>`;
+  out += `<line x1="${hw.toFixed(1)}" y1="6" x2="${hw.toFixed(1)}" y2="12" stroke="var(--gold)" stroke-width="2.5"/>`;
+  out += `<text x="${Math.max(hw + 7, 14)}" y="13" font-size="11.5" fill="var(--gold)" font-weight="700">${nH.toLocaleString()}</text>`;
+  out += `<text x="${W - 1}" y="13" text-anchor="end" font-size="11.5" fill="var(--pos)" font-weight="700">${(N - nH).toLocaleString()}</text>`;
+  // People come in whole numbers, so these counts are rounded; the exact posterior in
+  // the answer panel is computed from the probabilities, not from the rounded grid.
+  // Saying "about" keeps the two from appearing to contradict each other.
+  out += `<text x="${W/2}" y="${H - 4}" text-anchor="middle" font-size="11" fill="var(--sec)" font-weight="600">` +
+         `about ${(nHE + nNHE).toLocaleString()} of ${N.toLocaleString()} fit the evidence — about ${nHE.toLocaleString()} of them on the left</text>`;
+  svg.innerHTML = out;
+}
+
+// ---------- panel 2: the unit square --------------------------------------
+function drawArea(prior, lh, lnh, post){
+  const svg = $("area"); const p = PRESETS[cur];
+  const X0 = 44, Y0 = 16, S = 244;                     // square origin + size
+  const wH = Math.max(prior * S, 1.2);                  // width of the H column
+  const hH = lh * S, hN = lnh * S;                      // shaded heights
+
+  let o = "";
+  o += `<rect x="${X0}" y="${Y0}" width="${S}" height="${S}" fill="#fff" stroke="var(--line)"/>`;
+  // unshaded blocks
+  o += `<rect x="${X0}" y="${Y0}" width="${wH}" height="${S}" fill="var(--gold)" opacity=".20"/>`;
+  o += `<rect x="${X0+wH}" y="${Y0}" width="${S-wH}" height="${S}" fill="var(--pos)" opacity=".16"/>`;
+  // evidence bands, drawn from the bottom up
+  o += `<rect x="${X0}" y="${Y0+S-hH}" width="${wH}" height="${hH}" fill="var(--sec)" opacity=".95"/>`;
+  o += `<rect x="${X0+wH}" y="${Y0+S-hN}" width="${S-wH}" height="${hN}" fill="var(--sec)" opacity=".48"/>`;
+  o += `<line x1="${X0+wH}" y1="${Y0}" x2="${X0+wH}" y2="${Y0+S}" stroke="#fff" stroke-width="2"/>`;
+  o += `<rect x="${X0}" y="${Y0}" width="${S}" height="${S}" fill="none" stroke="var(--text)" stroke-width="1.2"/>`;
+
+  // labels
+  o += `<text x="${X0+wH/2}" y="${Y0+S+15}" text-anchor="middle" font-size="11" fill="var(--gold)" font-weight="700">P(H)</text>`;
+  o += `<text x="${X0+wH+(S-wH)/2}" y="${Y0+S+15}" text-anchor="middle" font-size="11" fill="var(--pos)" font-weight="700">P(not H)</text>`;
+  o += `<text x="${X0-6}" y="${Y0+S-hH/2}" text-anchor="end" font-size="10.5" fill="var(--sec)" font-weight="700">P(E|H)</text>`;
+  o += `<text x="${X0+S+6}" y="${Y0+S-hN/2}" text-anchor="start" font-size="10.5" fill="var(--sec)" font-weight="700">P(E|¬H)</text>`;
+
+  // the posterior as the proportion of the shaded region on the left
+  const BY = Y0 + S + 58, BH = 20, aH = prior*lh, aN = (1-prior)*lnh, tot = aH + aN;
+  const wLeft = tot > 0 ? (aH/tot) * S : 0;
+  o += `<text x="${X0}" y="${BY-7}" font-size="10.5" fill="var(--gray)">of everything that fits the evidence:</text>`;
+  o += `<rect x="${X0}" y="${BY}" width="${S}" height="${BH}" fill="var(--sec)" opacity=".28" rx="3"/>`;
+  o += `<rect x="${X0}" y="${BY}" width="${wLeft}" height="${BH}" fill="var(--sec)" rx="3"/>`;
+  if (wLeft > 34)
+    o += `<text x="${X0+wLeft/2}" y="${BY+14}" text-anchor="middle" font-size="11.5" fill="#fff" font-weight="700">${(post*100).toFixed(1)}%</text>`;
+  else
+    o += `<text x="${X0+wLeft+5}" y="${BY+14}" font-size="11.5" fill="var(--sec)" font-weight="700">${(post*100).toFixed(1)}%</text>`;
+  svg.setAttribute("viewBox", `0 0 400 ${BY+BH+14}`);
+  svg.innerHTML = o;
+}
+
+[sPrior, sLh, sLnh].forEach(s => s.addEventListener("input", draw));
+$("p-husky").addEventListener("click", () => apply("husky"));
+$("p-fraud").addEventListener("click", () => apply("fraud"));
+$("p-irrelevant").addEventListener("click", () => apply("irrelevant"));
+apply("husky");
+</script>
+</body>
+</html>
