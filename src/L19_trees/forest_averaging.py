@@ -171,6 +171,17 @@ def create_forest_figure(n_trees=100):
     layout.margin = dict(l=20, r=20, t=60, b=110)
     layout.annotations = [
     ]
+    # 18 Nov 2026 (Ryan, Topic 19): readable axis titles and a show/hide button for the blue ensemble surface.
+    # The button changes opacity only, so the B slider (which sets "visible") still chooses the ensemble shown.
+    big = dict(size=20, color="#1f2937")
+    for axn, txt in (("xaxis", "Income"), ("yaxis", "Credit score"), ("zaxis", "Predicted value")):
+        getattr(layout.scene, axn).title = dict(text=txt, font=big)
+        getattr(layout.scene, axn).tickfont = dict(size=14, color="#374151")
+    ens = list(range(1, 1 + len(B_values)))
+    layout.updatemenus = [dict(type="buttons", direction="right", x=0, xanchor="left", y=1.02, yanchor="bottom",
+        showactive=True, active=0, pad=dict(r=6, t=2),
+        buttons=[dict(label="Show blue (the forest)", method="restyle", args=[{"opacity": [0.7] * len(ens)}, ens]),
+                 dict(label="Hide blue", method="restyle", args=[{"opacity": [0] * len(ens)}, ens])])]
 
     fig.update_layout(layout)
     return fig
